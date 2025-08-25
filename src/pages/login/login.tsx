@@ -1,0 +1,130 @@
+import { useNavigate } from "react-router";
+import { useState } from "react";
+import { toast, Bounce } from "react-toastify";
+import DOMPurify from "dompurify";
+import { LoaderCircle } from "lucide-react";
+
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { useLogin } from "@/hooks/auth/useLogin";
+import { decodeData } from "@/utils/jwtToken";
+
+function InputWithLabel({
+  name,
+  label,
+  type,
+  placeholder,
+  handleChange,
+}: {
+  name: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <div className="w-full py-4">
+      <Label htmlFor={name} className="pb-2">
+        {label}
+      </Label>
+      <Input
+        type={type}
+        id={name}
+        placeholder={placeholder}
+        className="rounded-full h-12 focus-visible:border-[#304DAF]"
+        onChange={handleChange}
+      />
+    </div>
+  );
+}
+
+function LoginForm() {
+  const { login } = useLogin();
+  const navigate = useNavigate();
+
+  const [token, setToken] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleLogin = async () => {
+    if (!token || !userName || !password) return;
+
+    try {
+      setIsLoading(true);
+      const res = await login(password, userName, token);
+      if (res) {
+        const decodedRes = await decodeData(res?.data.data);
+        localStorage.setItem(
+          "branchToken",
+          JSON.stringify(decodedRes?.data?.Data)
+        );
+        navigate("/select-branch");
+      }
+    } catch (e) {
+      toast.error(
+        DOMPurify.sanitize(
+          e?.response?.data?.message || "Authentication failed"
+        ),
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        }
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form>
+      <InputWithLabel
+        name="username"
+        label="Username"
+        type="text"
+        placeholder="Username"
+        handleChange={(e) => setUserName(e.target.value)}
+      />
+      <InputWithLabel
+        name="password"
+        label="Password"
+        type="password"
+        placeholder="Password"
+        handleChange={(e) => setPassword(e.target.value)}
+      />
+      <InputWithLabel
+        name="token"
+        label="Token"
+        type="text"
+        placeholder="Token"
+        handleChange={(e) => setToken(e.target.value)}
+      />
+      <Button
+        className="w-full bg-[#304DAF] py-8 text-white rounded-full text-lg mt-4 cursor-pointer hover:opacity-50"
+        type="button"
+        disabled={!token || !userName || !password}
+        onClick={() => handleLogin()}
+      >
+        {isLoading ? <LoaderCircle className="animate-spin" /> : "Login"}
+      </Button>
+    </form>
+  );
+}
+
+export default function Login() {
+  return (
+    <div className="mt-12 w-[70%] lg:w-[60%] xl:w-[40%] mx-auto rounded-xl bg-white p-10">
+      <h3 className="font-bold text-lg">Welcome</h3>
+      <p className="mb-12">Log in with your Alternative ID</p>
+      <LoginForm />
+    </div>
+  );
+}
