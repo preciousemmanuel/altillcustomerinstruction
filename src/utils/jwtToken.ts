@@ -68,7 +68,7 @@ export async function decodeData(
   }
 }
 
-export function toLowerCaseKeys<T extends Record<string, unknown>>(obj: T): T {
+export function toLowerCaseKeys<T extends Record<string, any>>(obj: T): T {
   return Object.fromEntries(
     Object.entries(obj).map(([key, value]) => [
       key.toLowerCase(),
@@ -79,7 +79,7 @@ export function toLowerCaseKeys<T extends Record<string, unknown>>(obj: T): T {
   ) as T;
 }
 
-export function toUpperCaseKeys<T extends Record<string, unknown>>(obj: T): T {
+export function toUpperCaseKeys<T extends Record<string, any>>(obj: T): T {
   return Object.fromEntries(
     Object.entries(obj).map(([key, value]) => [
       key.toLowerCase(),

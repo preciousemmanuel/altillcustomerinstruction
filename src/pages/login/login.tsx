@@ -10,6 +10,12 @@ import { Label } from "@/components/ui/label";
 import { useLogin } from "@/hooks/auth/useLogin";
 import { decodeData } from "@/utils/jwtToken";
 
+interface DecodedDataResponse {
+  data?: {
+    Data?: Record<string, unknown>;
+  };
+}
+
 function InputWithLabel({
   name,
   label,
@@ -55,17 +61,19 @@ function LoginForm() {
       setIsLoading(true);
       const res = await login(password, userName, token);
       if (res) {
-        const decodedRes = await decodeData(res?.data.data);
+        const decodedRes = (await decodeData(
+          res?.data.data
+        )) as DecodedDataResponse;
         localStorage.setItem(
           "branchToken",
-          JSON.stringify(decodedRes?.data?.Data)
+          JSON.stringify(decodedRes?.data?.Data as Record<string, unknown>)
         );
         navigate("/select-branch");
       }
     } catch (e) {
       toast.error(
         DOMPurify.sanitize(
-          e?.response?.data?.message || "Authentication failed"
+          (e as any)?.response?.data?.message || "Authentication failed"
         ),
         {
           position: "top-right",
