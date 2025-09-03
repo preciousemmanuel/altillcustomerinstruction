@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, UserPlus } from "lucide-react";
 import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function CustomerSelectCard({
   title,
@@ -41,6 +42,7 @@ function CustomerSelectCard({
 
 function Landing() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleSelect = useCallback(
     (type: string) => {
@@ -48,6 +50,12 @@ function Landing() {
     },
     [selectedOption]
   );
+
+  const handleProceed = () => {
+    if (selectedOption === "customer") {
+      navigate("/account-form");
+    }
+  };
 
   return (
     <div className="flex flex-col items-center h-screen py-10">
@@ -81,6 +89,7 @@ function Landing() {
         <Button
           className="rounded-full y-[22px] mt-4 p-8 bg-[#304DAF] text-white w-[50%] my-12"
           disabled={!selectedOption}
+          onClick={handleProceed}
         >
           Proceed
         </Button>
