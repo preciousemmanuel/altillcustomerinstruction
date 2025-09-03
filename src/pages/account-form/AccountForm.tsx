@@ -1,152 +1,237 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import DepositInfoModal from "@/components/modals/DepositInfoModal";
-import OtpVerificationModal from "@/components/modals/OtpVerificationModal";
-import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+"use client"
 
-function AccountForm() {
-  const [transactionType, setTransactionType] = useState("deposit");
-  const [accountNumber, setAccountNumber] = useState("0503370166");
-  const [accountName, setAccountName] = useState(
-    "S MAI NONO MULTIPURPOSE VENTURES"
-  );
-  const [accountType, setAccountType] = useState("savings");
-  const [amount, setAmount] = useState("1,000,000,000.00");
+import { useState } from "react"
+import { ArrowLeft, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 
-  const [isDepositModalOpen, setDepositModalOpen] = useState(false);
-  const [isOtpModalOpen, setOtpModalOpen] = useState(false);
-
-  const navigate = useNavigate();
+export default function AccountForm() {
+  const [showDetailModal, setShowDetailModal] = useState(false)
+  const [showOtpModal, setShowOtpModal] = useState(false)
+  const [transactionType, setTransactionType] = useState("deposit")
+  const [accountType, setAccountType] = useState("savings")
+  const [amount, setAmount] = useState("₦1,000,000,000.00")
+  const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""])
 
   const handleProceed = () => {
-    setDepositModalOpen(true);
-  };
+    setShowDetailModal(true)
+  }
 
-  const handleDepositProceed = () => {
-    setDepositModalOpen(false);
-    setOtpModalOpen(true);
-  };
+  const handleDetailProceed = () => {
+    setShowDetailModal(false)
+    setShowOtpModal(true)
+  }
 
-  const handleOtpVerify = (otp: string) => {
-    console.log("OTP verified:", otp);
-    setOtpModalOpen(false);
-  };
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length <= 1) {
+      const newOtpValues = [...otpValues]
+      newOtpValues[index] = value
+      setOtpValues(newOtpValues)
+
+      // Auto-focus next input
+      if (value && index < 5) {
+        const nextInput = document.getElementById(`otp-${index + 1}`)
+        nextInput?.focus()
+      }
+    }
+  }
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="bg-white w-[450px] p-8 rounded-xl shadow-lg">
-        <div className="flex items-center mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft />
-          </Button>
-          <h1 className="text-xl font-semibold ml-4">Customer instructions</h1>
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <div className="bg-white px-6 py-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-yellow-500 rounded flex items-center justify-center">
+              <div className="w-6 h-6 bg-yellow-600 rounded-sm"></div>
+            </div>
+            <div>
+              <div className="text-sm font-semibold">the</div>
+              <div className="text-sm font-semibold">alternative</div>
+              <div className="text-sm font-semibold">bank</div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div className="space-y-6">
-          <div>
-            <Label>Select transaction type</Label>
-            <div className="flex mt-2 border rounded-md p-1">
-              <Button
-                variant={transactionType === "deposit" ? "secondary" : "ghost"}
-                className="flex-1"
-                onClick={() => setTransactionType("deposit")}
-              >
-                Deposit
-              </Button>
-              <Button
-                variant={
-                  transactionType === "withdrawal" ? "secondary" : "ghost"
-                }
-                className="flex-1"
-                onClick={() => setTransactionType("withdrawal")}
-              >
-                Withdrawal
-              </Button>
+      {/* Main Content */}
+      <div className="max-w-md mx-auto bg-white mt-8 rounded-lg shadow-sm">
+        <div className="p-6">
+          {/* Back Button */}
+          <button className="flex items-center gap-2 mb-6 text-gray-700">
+            <ArrowLeft className="w-5 h-5" />
+            <span className="font-medium">Back</span>
+          </button>
+
+          <h1 className="text-xl font-semibold mb-8 text-gray-900">Customer instructions</h1>
+
+          {/* Transaction Type Selection */}
+          <div className="mb-8">
+            <div className="border border-gray-200 rounded-lg p-4">
+              <Label className="text-sm font-medium text-gray-700 mb-3 block">Select transaction type</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant={transactionType === "deposit" ? "default" : "outline"}
+                  className={`flex-1 h-12 rounded-full ${transactionType === "deposit" ? "bg-blue-100 text-blue-700 border-blue-200" : ""}`}
+                  onClick={() => setTransactionType("deposit")}
+                >
+                  Deposit
+                </Button>
+                <Button
+                  variant="ghost"
+                  className={`flex-1 h-12 rounded-full ${transactionType === "withdrawal" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}
+                  onClick={() => setTransactionType("withdrawal")}
+                >
+                  Withdrawal
+                </Button>
+              </div>
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="accountNumber">Account Number</Label>
+          {/* Account Number */}
+          <div className="mb-6">
+            <Label className="text-sm font-medium text-gray-700 mb-2 block">Account Number</Label>
+            <Input value="0503370166" readOnly className="bg-gray-50 text-gray-900 font-medium h-12 rounded-full" />
+          </div>
+
+          {/* Account Name */}
+          <div className="mb-6">
             <Input
-              id="accountNumber"
-              value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value)}
-              className="mt-2"
+              value="S MAI NONO MULTIPURPOSE VENTURES"
+              readOnly
+              className="bg-blue-50 text-gray-700 font-medium border-blue-200 h-12 rounded-full"
             />
           </div>
 
-          <div className="bg-blue-100 p-3 rounded-md">
-            <p className="text-blue-800 font-semibold">{accountName}</p>
-          </div>
-
-          <div>
-            <Label htmlFor="accountType">Account Type</Label>
-            <Select onValueChange={setAccountType} value={accountType}>
-              <SelectTrigger id="accountType" className="mt-2">
+          {/* Account Type */}
+          <div className="mb-6">
+            <Label className="text-sm font-medium text-gray-700 mb-2 block">Account Type</Label>
+            <Select value={accountType} onValueChange={setAccountType}>
+              <SelectTrigger className="w-full h-12 rounded-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="savings">Savings</SelectItem>
                 <SelectItem value="current">Current</SelectItem>
+                <SelectItem value="fixed">Fixed Deposit</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div>
-            <Label htmlFor="amount">Enter Amount</Label>
+          {/* Amount */}
+          <div className="mb-8">
+            <Label className="text-sm font-medium text-gray-700 mb-2 block">Enter Amount</Label>
             <Input
-              id="amount"
-              value={`₦${amount}`}
-              onChange={(e) => setAmount(e.target.value.replace("₦", ""))}
-              className="mt-2"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="text-lg font-semibold h-12 rounded-full"
             />
           </div>
 
-          <div className="flex gap-4 pt-4">
-            <DepositInfoModal
-              open={isDepositModalOpen}
-              onOpenChange={setDepositModalOpen}
-              accountName={accountName}
-              accountNumber={accountNumber}
-              currency="NGN"
-              amount={amount}
-              accountType={accountType}
-              onProceed={handleDepositProceed}
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <Button
+              onClick={handleProceed}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium"
             >
-              <Button className="w-full" onClick={handleProceed}>
-                Proceed
-              </Button>
-            </DepositInfoModal>
+              Proceed
+            </Button>
             <Button
               variant="outline"
-              className="w-full"
-              onClick={() => navigate(-1)}
+              className="flex-1 border-red-300 text-red-600 hover:bg-red-50 h-12 rounded-full font-medium bg-transparent"
             >
               Cancel
             </Button>
           </div>
         </div>
-
-        <OtpVerificationModal
-          open={isOtpModalOpen}
-          onOpenChange={setOtpModalOpen}
-          onVerify={handleOtpVerify}
-        >
-          <div />
-        </OtpVerificationModal>
       </div>
-    </div>
-  );
-}
 
-export default AccountForm;
+      {/* Deposit Information Modal */}
+      <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
+        <DialogContent className="max-w-md mx-auto p-0 gap-0">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-gray-900">Deposit information</h2>
+              <button onClick={() => setShowDetailModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-8">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Account Name</span>
+                <span className="text-gray-400">John Chukwuma Eze</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Account Number</span>
+                <span className="text-gray-400">1234567890</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Currency</span>
+                <span className="text-gray-400">NGN</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Amount</span>
+                <span className="text-gray-400">₦1,000,000,000.00</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Account Type</span>
+                <span className="text-gray-400">Savings</span>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleDetailProceed}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium"
+            >
+              Proceed
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* OTP Verification Modal */}
+      <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
+        <DialogContent className="max-w-md mx-auto p-0 gap-0">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-gray-900">OTP Verification</h2>
+              <button onClick={() => setShowOtpModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-gray-600 text-center mb-8">Please enter the OTP sent to your email or phone number</p>
+
+            {/* OTP Input Boxes */}
+            <div className="flex justify-center gap-3 mb-6">
+              {otpValues.map((value, index) => (
+                <input
+                  key={index}
+                  id={`otp-${index}`}
+                  type="text"
+                  maxLength={1}
+                  value={value}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  className="w-12 h-12 text-center text-2xl font-semibold border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                />
+              ))}
+            </div>
+
+            <div className="text-center mb-8">
+              <span className="text-gray-600">Didn't get an OTP? </span>
+              <button className="text-blue-600 font-medium">Resend</button>
+            </div>
+
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium">
+              Verify OTP
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
