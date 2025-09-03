@@ -41,22 +41,6 @@ export default function AccountForm() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-white px-6 py-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-yellow-500 rounded flex items-center justify-center">
-              <div className="w-6 h-6 bg-yellow-600 rounded-sm"></div>
-            </div>
-            <div>
-              <div className="text-sm font-semibold">the</div>
-              <div className="text-sm font-semibold">alternative</div>
-              <div className="text-sm font-semibold">bank</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="max-w-md mx-auto bg-white mt-8 rounded-lg shadow-sm">
         <div className="p-6">

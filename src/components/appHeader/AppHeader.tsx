@@ -15,8 +15,8 @@ export default function AppHeader() {
   }
 
   return (
-    <header>
-      <nav className="bg-white h-[85px] border-gray-200 px-4 lg:px-12 py-5">
+    <header className="sticky top-0 z-50">
+      <nav className="bg-white h-[85px] border-gray-200 px-4 lg:px-12 py-5 shadow-sm">
         <div className="flex flex-wrap justify-between items-center mx-auto">
           <img src="/images/logo.svg" className="h-12 me-8" alt=" Logo" />
           <a className="flex ms-2 md:me-24">
