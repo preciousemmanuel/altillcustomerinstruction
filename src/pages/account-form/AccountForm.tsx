@@ -58,15 +58,17 @@ export default function AccountForm() {
               <Label className="text-sm font-medium text-gray-700 mb-3 block">Select transaction type</Label>
               <div className="flex gap-2">
                 <Button
-                  variant={transactionType === "deposit" ? "default" : "outline"}
-                  className={`flex-1 h-12 rounded-full ${transactionType === "deposit" ? "bg-blue-100 text-blue-700 border-blue-200" : ""}`}
+                  variant={transactionType === "deposit" ? "default" : "ghost"}
+                  className={`flex-1 h-12 rounded-md ${transactionType === "deposit" ? "text-blue-700 border-blue-200" : "text-gray-600 hover:bg-gray-50 border-0"}`}
+                  style={{ backgroundColor: transactionType === "deposit" ? "#d5dfff" : "transparent" }}
                   onClick={() => setTransactionType("deposit")}
                 >
                   Deposit
                 </Button>
                 <Button
                   variant="ghost"
-                  className={`flex-1 h-12 rounded-full ${transactionType === "withdrawal" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}
+                  className={`flex-1 h-12 rounded-md border-0 ${transactionType === "withdrawal" ? "text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}
+                  style={{ backgroundColor: transactionType === "withdrawal" ? "#d5dfff" : "transparent" }}
                   onClick={() => setTransactionType("withdrawal")}
                 >
                   Withdrawal
@@ -83,11 +85,9 @@ export default function AccountForm() {
 
           {/* Account Name */}
           <div className="mb-6">
-            <Input
-              value="S MAI NONO MULTIPURPOSE VENTURES"
-              readOnly
-              className="bg-blue-50 text-gray-700 font-medium border-blue-200 h-12 rounded-full"
-            />
+            <div className="bg-blue-200 text-gray-700 font-medium h-12 rounded-md px-4 flex items-center">
+              S MAI NONO MULTIPURPOSE VENTURES
+            </div>
           </div>
 
           {/* Account Type */}
