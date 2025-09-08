@@ -14,6 +14,7 @@ import AccountNumberInput from "@/components/common/accountNumberInput"
 import { sanitizeInput } from "@/utils/sanitizer"
 import InlineTextLoader from "@/components/common/inlineTextLoader"
 import { AccountType } from "@/utils/base.enum"
+import CurrencyInput from "react-currency-input-field";
 export default function AccountForm() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showOtpModal, setShowOtpModal] = useState(false)
@@ -279,11 +280,22 @@ export default function AccountForm() {
                   )}
                   <div className="flex-1">
                     <Label className="text-sm font-medium text-gray-700 mb-2 block">Amount</Label>
-                    <Input
+                    <CurrencyInput
+                id="input-example"
+                name="input-name"
+                className="bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-[200px] pl-8 rounded-full w-full"
+                placeholder="Please enter amount"
+                value={amount}
+                allowDecimals
+                decimalsLimit={2}
+                allowNegativeValue={false}
+                onValueChange={(value) => setAmount(value ? Number(value) : 0)}
+              />
+                    {/* <Input
                       value={amount}
                       onChange={(e: any) => setAmount(e.target.value)}
                       className="text-lg font-semibold h-12 rounded-full w-full"
-                    />
+                    /> */}
                   </div>
                 </div>
               </div>
