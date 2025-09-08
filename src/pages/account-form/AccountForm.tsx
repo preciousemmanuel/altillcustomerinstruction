@@ -34,9 +34,21 @@ export default function AccountForm() {
     setShowDetailModal(true)
   }
 
+  const isProceedDisabled = !accountNumber || !senderAccount || !amount || loading || isProcessing;
+
+  const formatCurrency = (value: number, currency: string) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: currency,
+    }).format(value);
+  };
+
   const validateAccount = useCallback(
     (accountNumber: string) => {
-      if (!accountNumber) return;
+      if (!accountNumber) {
+        setSenderAccount(null);
+        return;
+      }
 
       setLoading(true);
       setSenderAccount(null);
@@ -276,6 +288,7 @@ export default function AccountForm() {
             <div className="flex gap-3">
               <Button
                 onClick={handleProceed}
+                disabled={isProceedDisabled}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium"
               >
                 Proceed
@@ -304,23 +317,23 @@ export default function AccountForm() {
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Account Name</span>
-                  <span className="text-gray-400">John Chukwuma Eze</span>
+                  <span className="text-gray-400">{senderAccount?.name}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Account Number</span>
-                  <span className="text-gray-400">1234567890</span>
+                  <span className="text-gray-400">{accountNumber}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Currency</span>
-                  <span className="text-gray-400">NGN</span>
+                  <span className="text-gray-400">{currency}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Amount</span>
-                  <span className="text-gray-400">₦1,000,000,000.00</span>
+                  <span className="text-gray-400">{formatCurrency(amount, currency)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Account Type</span>
-                  <span className="text-gray-400">Savings</span>
+                  <span className="text-gray-400">{senderAccount?.ledgername}</span>
                 </div>
               </div>
 
