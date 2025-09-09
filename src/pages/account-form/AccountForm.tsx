@@ -16,11 +16,15 @@ import { sanitizeInput } from "@/utils/sanitizer"
 import InlineTextLoader from "@/components/common/inlineTextLoader"
 import { AccountType, CustomerType } from "@/utils/base.enum"
 import CurrencyInput from "react-currency-input-field";
-import generate, { capitalizeFirstLetter } from "@/utils/randomGenerator"
+import generate, { capitalizeFirstLetter } from "@/utils/randomGenerator";
+import SuccessModal from "@/components/common/SuccessModal";
+
 export default function AccountForm() {
   const navigate = useNavigate();
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showOtpModal, setShowOtpModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [queueNumber, setQueueNumber] = useState("");
   const [transactionType, setTransactionType] = useState("deposit")
   const location = useLocation();
   const [accountType, setAccountType] = useState("savings")
@@ -207,9 +211,9 @@ export default function AccountForm() {
             transition: Bounce,
           });
         } else {
-         
-           // setShowSuccess(true);
-          
+          setShowDetailModal(false);
+          setQueueNumber(res.data.queuenumber);
+          setShowSuccessModal(true);
         }
       })
       .catch((e) => {
@@ -465,13 +469,20 @@ export default function AccountForm() {
 
               <Button
                 onClick={onSubmit}
+                disabled={loading}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium"
               >
-                Proceed
+                {loading ? "Processing..." : "Proceed"}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
+
+        <SuccessModal
+          open={showSuccessModal}
+          onOpenChange={setShowSuccessModal}
+          queueNumber={queueNumber}
+        />
 
         {/* OTP Verification Modal */}
         <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
