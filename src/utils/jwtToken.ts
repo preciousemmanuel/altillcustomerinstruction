@@ -10,11 +10,11 @@ export async function generateKey(data: Record<string, unknown>) {
   return token;
 }
 
-export async function generateforString(data: Record<string, unknown>) {
+export async function generateforString(data: any) {
   const token = await new SignJWT({ data }) // details to  encode in the token
-    .setProtectedHeader({ alg: "HS256" }) // algorithm
+    .setProtectedHeader({ alg: 'HS256' }) // algorithm
     .sign(secret);
-  return token;
+  return token
 }
 
 export async function decodeKey(

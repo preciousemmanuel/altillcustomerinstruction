@@ -129,10 +129,12 @@ function LoginForm() {
 
 export default function Login() {
   return (
-    <div className="mt-12 w-[70%] lg:w-[60%] xl:w-[40%] mx-auto rounded-xl bg-white p-10">
-      <h3 className="font-bold text-lg">Welcome</h3>
-      <p className="mb-12">Log in with your Alternative ID</p>
-      <LoginForm />
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md mx-auto rounded-xl bg-white p-10">
+        <h3 className="font-bold text-lg">Welcome</h3>
+        <p className="mb-12">Log in with your Alternative ID</p>
+        <LoginForm />
+      </div>
     </div>
   );
 }

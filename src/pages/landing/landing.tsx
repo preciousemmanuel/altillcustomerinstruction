@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CustomerType } from "@/utils/base.enum";
 import { User, UserPlus } from "lucide-react";
 import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function CustomerSelectCard({
   title,
@@ -41,6 +43,7 @@ function CustomerSelectCard({
 
 function Landing() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleSelect = useCallback(
     (type: string) => {
@@ -49,23 +52,29 @@ function Landing() {
     [selectedOption]
   );
 
+  const handleProceed = () => {
+    if (selectedOption === CustomerType.Self) {
+      navigate("/account-form", { state: {userType: selectedOption } });
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center h-screen py-10">
-      <div className="bg-white w-[80%] p-6 rounded-xl text-center min-h-[50vh]">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="bg-white w-full md:w-[80%] p-6 rounded-xl text-center min-h-[50vh] flex flex-col justify-center">
         <p className="text-2xl font-bold py-2">Customer Instruction Portal</p>
         <p className="text-base text-[#9CA3AF] pb-12">
           Submit your transaction instructions quickly and securely,
           <br /> to be treated by a teller.
         </p>
-        <div className="flex gap-6 w-full">
+        <div className="flex flex-col md:flex-row gap-6 w-full">
           <CustomerSelectCard
             buttonText="Continue as Customer"
             title="Customer"
             iconBgColor="bg-[#D0E2FB]"
             icon={<User className={`text-[#0066FF] w-6 h-6 m-3`} />}
             text="Submit transaction instructions for your account"
-            selected={selectedOption === "customer"}
-            onClick={() => handleSelect("customer")}
+            selected={selectedOption === CustomerType.Self}
+            onClick={() => handleSelect(CustomerType.Self)}
           />
           <CustomerSelectCard
             buttonText="Continue as Guest"
@@ -73,14 +82,15 @@ function Landing() {
             iconBgColor="bg-[#FFF1FF]"
             icon={<UserPlus className={`text-[#8F33A8] w-6 h-6 m-3`} />}
             text="Submit transaction instructions on behalf of a customer"
-            onClick={() => handleSelect("guest")}
-            selected={selectedOption === "guest"}
+            onClick={() => handleSelect(CustomerType.ThirdParty)}
+            selected={selectedOption === CustomerType.ThirdParty}
           />
         </div>
 
         <Button
-          className="rounded-full y-[22px] mt-4 p-8 bg-[#304DAF] text-white w-[50%] my-12"
+          className="rounded-full y-[22px] mt-4 p-8 bg-[#304DAF] text-white w-full md:w-[50%] my-12 self-center"
           disabled={!selectedOption}
+          onClick={handleProceed}
         >
           Proceed
         </Button>
