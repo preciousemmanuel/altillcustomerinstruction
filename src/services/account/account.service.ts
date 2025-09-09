@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, type AxiosResponse } from "axios";
+import axios, { type AxiosInstance } from "axios";
 import { generateKey,decodeKey,generateforString } from "../../utils/jwtToken";
 import { safeQuery } from "@/utils/sanitizer";
 
@@ -40,7 +40,7 @@ export class AccountService {
           
         })
         .then(async res => {
-          const retrievedData = await decodeKey(res.data.data)
+          // const retrievedData = await decodeKey(res.data.data)
           return decodeKey(res.data.data)
         })
     }

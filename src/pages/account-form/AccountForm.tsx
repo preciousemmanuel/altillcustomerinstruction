@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react"
 import { ArrowLeft, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+// import { Input } from "@/components/ui/input"
 import { useLocation, useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label"
 import { Bounce, ToastContainer, toast } from "react-toastify";
@@ -29,7 +29,7 @@ export default function AccountForm() {
   const [queueNumber, setQueueNumber] = useState("");
   const [transactionType, setTransactionType] = useState("deposit")
   const location = useLocation();
-  const [accountType, setAccountType] = useState("savings")
+  // const [accountType, setAccountType] = useState("savings")
   const [depositType, setDepositType] = useState("cash")
   const { validate, } = useTransaction();
   const { deposit } = depositTransaction();
@@ -43,7 +43,7 @@ export default function AccountForm() {
   const [amount, setAmount] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<any>({});
   const [userType, setUserType] = useState("")
-  const [depositor, setDepositor] = useState<string>("");
+  const [depositor, /* setDepositor */] = useState<string>("");
 
   const [chequeValidated, setChequeValidated] = useState<boolean>(false);
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
@@ -319,10 +319,10 @@ export default function AccountForm() {
       });
   };
 
-  const handleDetailProceed = () => {
-    setShowDetailModal(false)
-    setShowOtpModal(true)
-  }
+  // const handleDetailProceed = () => {
+  //   setShowDetailModal(false)
+  //   setShowOtpModal(true)
+  // }
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length <= 1) {

@@ -1,17 +1,15 @@
-export enum DepositType{
-    Cash = "cash",
-    Cheque = "Cheque",
-    
-}
+export const DepositType = {
+    Cash: "cash",
+    Cheque: "Cheque",
+} as const;
 
-export enum AccountType{
-    Savings = "saving",
-    Current = "current",
-    
-}
 
-export enum CustomerType{
-    Self = "self",
-    ThirdParty = "thirdParty",
-    
-}
+export const AccountType = {
+    Savings: "saving",
+    Current: "current",
+} as const;
+
+export const CustomerType = {
+    Self: "self",
+    ThirdParty: "thirdParty",
+} as const;
