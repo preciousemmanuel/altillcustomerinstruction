@@ -9,3 +9,9 @@ export enum AccountType{
     Current = "current",
     
 }
+
+export enum CustomerType{
+    Self = "self",
+    ThirdParty = "thirdParty",
+    
+}

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CustomerType } from "@/utils/base.enum";
 import { User, UserPlus } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -52,8 +53,8 @@ function Landing() {
   );
 
   const handleProceed = () => {
-    if (selectedOption === "customer") {
-      navigate("/account-form");
+    if (selectedOption === CustomerType.Self) {
+      navigate("/account-form", { state: {userType: selectedOption } });
     }
   };
 
@@ -72,8 +73,8 @@ function Landing() {
             iconBgColor="bg-[#D0E2FB]"
             icon={<User className={`text-[#0066FF] w-6 h-6 m-3`} />}
             text="Submit transaction instructions for your account"
-            selected={selectedOption === "customer"}
-            onClick={() => handleSelect("customer")}
+            selected={selectedOption === CustomerType.Self}
+            onClick={() => handleSelect(CustomerType.Self)}
           />
           <CustomerSelectCard
             buttonText="Continue as Guest"
@@ -81,8 +82,8 @@ function Landing() {
             iconBgColor="bg-[#FFF1FF]"
             icon={<UserPlus className={`text-[#8F33A8] w-6 h-6 m-3`} />}
             text="Submit transaction instructions on behalf of a customer"
-            onClick={() => handleSelect("guest")}
-            selected={selectedOption === "guest"}
+            onClick={() => handleSelect(CustomerType.ThirdParty)}
+            selected={selectedOption === CustomerType.ThirdParty}
           />
         </div>
 

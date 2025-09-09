@@ -1,37 +1,75 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback,useEffect } from "react"
 import { ArrowLeft, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useLocation,useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label"
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import DOMPurify from "dompurify";
-import { useTransaction } from "../../hooks/account/useTransaction";
+import { depositTransaction, useTransaction } from "../../hooks/account/useTransaction";
 import AccountNumberInput from "@/components/common/accountNumberInput"
 import { sanitizeInput } from "@/utils/sanitizer"
 import InlineTextLoader from "@/components/common/inlineTextLoader"
-import { AccountType } from "@/utils/base.enum"
+import { AccountType, CustomerType } from "@/utils/base.enum"
 import CurrencyInput from "react-currency-input-field";
+import generate, { capitalizeFirstLetter } from "@/utils/randomGenerator"
 export default function AccountForm() {
+  const navigate = useNavigate();
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showOtpModal, setShowOtpModal] = useState(false)
   const [transactionType, setTransactionType] = useState("deposit")
+  const location = useLocation();
   const [accountType, setAccountType] = useState("savings")
   const [depositType, setDepositType] = useState("cash")
-  const { validate } = useTransaction();
+  const { validate, } = useTransaction();
+  const { deposit } = depositTransaction();
   const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""])
   const [currency, setCurrency] = useState<string>("No currency");
-
+  const [narration, setNarration] = useState<any>("");
   const [senderAccount, setSenderAccount] = useState<any>();
   const [accountNumber, setAccountNumber] = useState<any>();
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
+  const [currentUser, setCurrentUser] = useState<any>({});
+  const [userType, setUserType] = useState("")
+  const [depositor, setDepositor] = useState<string>("");
+
+  
+  useEffect(() => {
+    const currentUser = localStorage.getItem("token");
+    console.log("currentUser ", currentUser);
+    if (currentUser) {
+      setCurrentUser(JSON.parse(currentUser));
+      setUserType(location.state.userType);
+      console.log("userType ", location.state.userType);
+      // setNarration(
+      //   `${
+      //     location.state.transaction.accountType === "current"
+      //       ? "Cash Deposit..."
+      //       : `Cash deposit by ${location.state.transaction?.name}`
+      //   }`
+      // );
+    } else {
+      navigate("/login");
+    }
+  }, [
+    
+    navigate,
+    location.state.userType,
+  ]);
+
 
   const handleProceed = () => {
+    if (userType==CustomerType.Self) {
+      setNarration(`${capitalizeFirstLetter(depositType)} deposit by ${senderAccount?.name}`);
+    } else {
+      setNarration(`${capitalizeFirstLetter(depositType)} deposit by ${depositor}`);
+    }
     setShowDetailModal(true)
   }
 
@@ -132,6 +170,66 @@ export default function AccountForm() {
     },
     [validate]
   );
+
+
+  const onSubmit = async () => {
+    setLoading(true);
+    const data: any = {
+      accountNumber,
+      transactionType: "deposit",
+      currency: senderAccount.currencycode,
+      amount,
+      accountName: senderAccount?.name,
+      transactionId: generate(12),
+      accountStatus: "active",
+      
+      depositorType: userType,
+      depositorName: depositor ? depositor : "Owner",
+      narration: narration,
+      mobileNumber: senderAccount.mobile,
+      bvn: senderAccount?.customerBVN,
+      branchNumber: currentUser.branchId,
+      
+    };
+    deposit(data)
+      .then((res) => {
+        setLoading(false);
+        if (res?.sucesss === false) {
+          toast.error(DOMPurify.sanitize(res?.message || "An error occurred"), {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          });
+        } else {
+         
+           // setShowSuccess(true);
+          
+        }
+      })
+      .catch((e) => {
+        toast.error(
+          DOMPurify.sanitize(e?.response?.data?.title || "An error occurred"),
+          {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          }
+        );
+        setLoading(false);
+      });
+  };
 
   const handleDetailProceed = () => {
     setShowDetailModal(false)
@@ -337,9 +435,9 @@ export default function AccountForm() {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">Deposit information</h2>
-                <button onClick={() => setShowDetailModal(false)} className="text-gray-400 hover:text-gray-600">
+                {/* <button onClick={() => setShowDetailModal(false)} className="text-gray-400 hover:text-gray-600">
                   <X className="w-5 h-5" />
-                </button>
+                </button> */}
               </div>
 
               <div className="space-y-4 mb-8">
@@ -366,7 +464,7 @@ export default function AccountForm() {
               </div>
 
               <Button
-                onClick={handleDetailProceed}
+                onClick={onSubmit}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium"
               >
                 Proceed
