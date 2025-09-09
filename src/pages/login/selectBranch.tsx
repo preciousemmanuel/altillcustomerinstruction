@@ -43,8 +43,8 @@ const SelectBranch = () => {
   }, [branches, selectedBranchCode]);
 
   return (
-    <div>
-      <div className="bg-white lg:w-[45%] w-[85%] xl:w-[40%] mx-auto xl:mt-[4%] md:mt-[4%] mt-[10%] rounded-lg md:p-10 p-4">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-md mx-auto rounded-lg p-10">
         <h1 className="text-xl font-bold">Please select Branch</h1>
         {branches.length > 0 ? (
           branches.map((branch, i) => (
