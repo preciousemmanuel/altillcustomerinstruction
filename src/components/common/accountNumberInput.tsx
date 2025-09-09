@@ -12,6 +12,7 @@ export default function AccountNumberInput({
   placeholder,
   customClass,
   disabled,
+  maxLength=10,
   handleInput,
   onBlur,
 }: {
@@ -26,6 +27,7 @@ export default function AccountNumberInput({
   placeholder?: string;
   customClass?: string;
   disabled?: boolean;
+  maxLength?: number;
   onBlur?: () => void;
   handleInput?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
@@ -46,7 +48,7 @@ export default function AccountNumberInput({
         disabled={disabled}
         required={isRequired}
         onBlur={onBlur} 
-        maxLength={10}
+        maxLength={maxLength}
         onInput={handleInput}
         className={customClass !== undefined ? customClass : fixedInputClass}
         placeholder={placeholder}

@@ -14,7 +14,7 @@ export default function SuccessModal({ open, onOpenChange, queueNumber }: Succes
 
   const handleReturnToHomepage = () => {
     onOpenChange(false);
-    navigate("/");
+    navigate("/home");
   };
 
   return (

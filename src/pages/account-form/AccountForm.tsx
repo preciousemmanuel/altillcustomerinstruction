@@ -1,16 +1,16 @@
 "use client"
 
-import { useState, useCallback,useEffect } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { ArrowLeft, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useLocation,useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label"
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import DOMPurify from "dompurify";
-import { depositTransaction, useTransaction } from "../../hooks/account/useTransaction";
+import { chequeValidation, depositTransaction, useTransaction } from "../../hooks/account/useTransaction";
 import AccountNumberInput from "@/components/common/accountNumberInput"
 import { sanitizeInput } from "@/utils/sanitizer"
 import InlineTextLoader from "@/components/common/inlineTextLoader"
@@ -18,9 +18,11 @@ import { AccountType, CustomerType } from "@/utils/base.enum"
 import CurrencyInput from "react-currency-input-field";
 import generate, { capitalizeFirstLetter } from "@/utils/randomGenerator";
 import SuccessModal from "@/components/common/SuccessModal";
+import ButtonLoaderTransactions from "@/components/common/buttonLoader"
 
 export default function AccountForm() {
   const navigate = useNavigate();
+  const { validateCheque } = chequeValidation();
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showOtpModal, setShowOtpModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -43,7 +45,11 @@ export default function AccountForm() {
   const [userType, setUserType] = useState("")
   const [depositor, setDepositor] = useState<string>("");
 
-  
+  const [chequeValidated, setChequeValidated] = useState<boolean>(false);
+  const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
+  const [cheque, setCheque] = useState<string>("");
+
+
   useEffect(() => {
     const currentUser = localStorage.getItem("token");
     console.log("currentUser ", currentUser);
@@ -62,14 +68,91 @@ export default function AccountForm() {
       navigate("/login");
     }
   }, [
-    
+
     navigate,
     location.state.userType,
   ]);
 
 
+  const chequeValidationAction = async () => {
+    if (cheque?.length < 0) {
+      return;
+    }
+    setLoadingCheque(true);
+    validateCheque(cheque, accountNumber)
+      .then((res: any) => {
+        console.log(res, "CHEQUE");
+        if (
+          res.sucesss == "false" &&
+          res?.data?.data?.chequestatus != "DRAWN" &&
+          res?.data?.data?.chequestatus != "AVAILABLE"
+        ) {
+          toast.error(DOMPurify.sanitize(res?.message) || "An error occurred", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          });
+        } else if (res?.data?.data?.chequestatus === "DRAWN") {
+          toast.error("This cheque number has already been used", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          });
+        } else if (
+          res?.data?.description === "True" &&
+          res?.data?.data?.chequestatus === "AVAILABLE"
+        ) {
+          toast.success("Cheque number is valid", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          });
+          setChequeValidated(true);
+          setLoadingCheque(false);
+        }
+        setLoadingCheque(false);
+      })
+      .catch((e) => {
+        setIsProcessing(false);
+        setLoadingCheque(false);
+        console.log(e?.response);
+        toast.error(
+          DOMPurify.sanitize(e?.response?.data) || "An error occurred",
+          {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          }
+        );
+      });
+  };
+
   const handleProceed = () => {
-    if (userType==CustomerType.Self) {
+    if (userType == CustomerType.Self) {
       setNarration(`${capitalizeFirstLetter(depositType)} deposit by ${senderAccount?.name}`);
     } else {
       setNarration(`${capitalizeFirstLetter(depositType)} deposit by ${depositor}`);
@@ -186,17 +269,18 @@ export default function AccountForm() {
       accountName: senderAccount?.name,
       transactionId: generate(12),
       accountStatus: "active",
-      
+
       depositorType: userType,
       depositorName: depositor ? depositor : "Owner",
       narration: narration,
       mobileNumber: senderAccount.mobile,
       bvn: senderAccount?.customerBVN,
-      branchNumber: currentUser.branchId,
-      
+      branchNumber: currentUser.BRANCH_CODE,
+
     };
     deposit(data)
-      .then((res) => {
+      .then((res: any) => {
+        console.log("Deposit response: ", res);
         setLoading(false);
         if (res?.sucesss === false) {
           toast.error(DOMPurify.sanitize(res?.message || "An error occurred"), {
@@ -212,7 +296,7 @@ export default function AccountForm() {
           });
         } else {
           setShowDetailModal(false);
-          setQueueNumber(res.data.queuenumber);
+          setQueueNumber(res?.data!.queuenumber || "");
           setShowSuccessModal(true);
         }
       })
@@ -353,6 +437,46 @@ export default function AccountForm() {
               </div>
             )}
 
+            {/* Cheque Number */}
+            {depositType ==="cheque" && (
+              <div className="mb-6">
+
+                <AccountNumberInput
+                  type="number"
+                  name="chequeNumber"
+                  id="chequeNumber"
+                  value={cheque}
+                  handleChange={(e) => setCheque(e.target.value)}
+                  handleInput={(e) => {
+                    e.target.value = sanitizeInput(e.target.value);
+                  }}
+                  onBlur={() => chequeValidationAction()}
+                  labelText={"Cheque Number"}
+                  labelFor={""}
+                  placeholder={"Please enter cheque number"}
+                  customClass={
+                    "bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
+                  }
+                />
+              </div>
+
+            )}
+            {/* show loading when check is validated, if validated show validated text */}
+            {loadingCheque ? (
+              <InlineTextLoader></InlineTextLoader>
+            )
+              :
+              chequeValidated ? <div
+                className={`${chequeValidated
+                    ? "text-[#099F4E]"
+                    : "text-[#304DAF]"
+                  } text-bold mt-16 ms-12 cursor-pointer`}
+
+              >
+                {"Validated"}
+              </div> : null
+
+            }
 
             {/* Amount with Currency Dropdown */}
             {senderAccount && (
@@ -371,10 +495,10 @@ export default function AccountForm() {
                             USD
                           </SelectItem>
                           <SelectItem value="EU" disabled className="text-gray-400">
-                          Euro
+                            Euro
                           </SelectItem>
                           <SelectItem value="P" disabled className="text-gray-400">
-                          Pounds
+                            Pounds
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -383,16 +507,16 @@ export default function AccountForm() {
                   <div className="flex-1">
                     <Label className="text-sm font-medium text-gray-700 mb-2 block">Amount</Label>
                     <CurrencyInput
-                id="input-example"
-                name="input-name"
-                className="bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-[200px] pl-8 rounded-full w-full"
-                placeholder="Please enter amount"
-                value={amount}
-                allowDecimals
-                decimalsLimit={2}
-                allowNegativeValue={false}
-                onValueChange={(value) => setAmount(value ? Number(value) : 0)}
-              />
+                      id="input-example"
+                      name="input-name"
+                      className="bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-[200px] pl-8 rounded-full w-full"
+                      placeholder="Please enter amount"
+                      value={amount}
+                      allowDecimals
+                      decimalsLimit={2}
+                      allowNegativeValue={false}
+                      onValueChange={(value) => setAmount(value ? Number(value) : 0)}
+                    />
                     {/* <Input
                       value={amount}
                       onChange={(e: any) => setAmount(e.target.value)}
@@ -467,13 +591,16 @@ export default function AccountForm() {
                 </div>
               </div>
 
-              <Button
-                onClick={onSubmit}
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium"
-              >
-                {loading ? "Processing..." : "Proceed"}
-              </Button>
+              {
+                !loading ? <Button
+                  onClick={onSubmit}
+                  disabled={loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium"
+                >
+                  {loading ? "Processing..." : "Proceed"}
+                </Button> : <ButtonLoaderTransactions />
+
+              }
             </div>
           </DialogContent>
         </Dialog>

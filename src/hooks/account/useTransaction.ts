@@ -21,3 +21,11 @@ export const useTransaction = () => {
     };
     return { deposit };
   };
+
+  export const chequeValidation = () => {
+    const validateCheque = async (Cheque: any, accountNumber: any) => {
+      const response = await accountService.validateCheque(Cheque, accountNumber);
+      return response;
+    };
+    return { validateCheque };
+  };

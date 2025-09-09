@@ -72,7 +72,7 @@ export class AccountService {
     deposit = async (data: any) => {
       const tokenatedData: any = await generateKey(data)
       return this.instance
-        .post('api/Transactions/Deposit', { data: tokenatedData }, {
+        .post('api/CustomerInstruction/Deposit', { data: tokenatedData }, {
           
         })
         .then(res => {
@@ -119,7 +119,7 @@ export class AccountService {
       const encryptedCheque: any = await generateforString(cheque);
   
       return this.instance
-        .get(`/api/ThirdPartyContorller/GetChequeDetails?accountNumber=${safeQuery(encryptedAccountNumber)}&chequeNumber=${safeQuery(encryptedCheque)}`, {
+        .get(`/api/CustomerInstruction/GetChequeDetails?accountNumber=${safeQuery(encryptedAccountNumber)}&chequeNumber=${safeQuery(encryptedCheque)}`, {
           
         })
         .then(res => {
