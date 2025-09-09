@@ -59,14 +59,14 @@ function Landing() {
   };
 
   return (
-    <div className="flex flex-col items-center h-screen py-10">
-      <div className="bg-white w-[80%] p-6 rounded-xl text-center min-h-[50vh]">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="bg-white w-full md:w-[80%] p-6 rounded-xl text-center min-h-[50vh] flex flex-col justify-center">
         <p className="text-2xl font-bold py-2">Customer Instruction Portal</p>
         <p className="text-base text-[#9CA3AF] pb-12">
           Submit your transaction instructions quickly and securely,
           <br /> to be treated by a teller.
         </p>
-        <div className="flex gap-6 w-full">
+        <div className="flex flex-col md:flex-row gap-6 w-full">
           <CustomerSelectCard
             buttonText="Continue as Customer"
             title="Customer"
@@ -88,7 +88,7 @@ function Landing() {
         </div>
 
         <Button
-          className="rounded-full y-[22px] mt-4 p-8 bg-[#304DAF] text-white w-[50%] my-12"
+          className="rounded-full y-[22px] mt-4 p-8 bg-[#304DAF] text-white w-full md:w-[50%] my-12 self-center"
           disabled={!selectedOption}
           onClick={handleProceed}
         >
