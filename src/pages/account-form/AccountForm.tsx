@@ -549,7 +549,7 @@ export default function AccountForm() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/home")}
                 className="flex-1 border-red-300 text-red-600 hover:bg-red-50 h-12 rounded-full font-medium bg-transparent"
               >
                 Cancel
