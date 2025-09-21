@@ -118,7 +118,7 @@ function LoginForm() {
       <Button
         className="w-full bg-[#304DAF] py-8 text-white rounded-full text-lg mt-4 cursor-pointer hover:opacity-50"
         type="button"
-        disabled={!token || !userName || !password}
+        disabled={!token.trim() || !userName.trim() || !password.trim()}
         onClick={() => handleLogin()}
       >
         {isLoading ? <LoaderCircle className="animate-spin" /> : "Login"}

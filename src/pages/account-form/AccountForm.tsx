@@ -1,39 +1,47 @@
-"use client"
+"use client";
 
-import { useState, useCallback, useEffect } from "react"
-import { ArrowLeft, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
+import { useState, useCallback, useEffect } from "react";
+import { ArrowLeft, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/label";
 import { Bounce, ToastContainer, toast } from "react-toastify";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import DOMPurify from "dompurify";
-import { chequeValidation, depositTransaction, useTransaction } from "../../hooks/account/useTransaction";
-import AccountNumberInput from "@/components/common/accountNumberInput"
-import { sanitizeInput } from "@/utils/sanitizer"
-import InlineTextLoader from "@/components/common/inlineTextLoader"
-import { AccountType, CustomerType } from "@/utils/base.enum"
+import {
+  chequeValidation,
+  depositTransaction,
+  useTransaction,
+} from "../../hooks/account/useTransaction";
+import AccountNumberInput from "@/components/common/accountNumberInput";
+import { sanitizeInput } from "@/utils/sanitizer";
+import InlineTextLoader from "@/components/common/inlineTextLoader";
+import { AccountType, CustomerType } from "@/utils/base.enum";
 import CurrencyInput from "react-currency-input-field";
 import generate, { capitalizeFirstLetter } from "@/utils/randomGenerator";
 import SuccessModal from "@/components/common/SuccessModal";
-import ButtonLoaderTransactions from "@/components/common/buttonLoader"
+import ButtonLoaderTransactions from "@/components/common/buttonLoader";
 
 export default function AccountForm() {
   const navigate = useNavigate();
   const { validateCheque } = chequeValidation();
-  const [showDetailModal, setShowDetailModal] = useState(false)
-  const [showOtpModal, setShowOtpModal] = useState(false)
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [queueNumber, setQueueNumber] = useState("");
-  const [transactionType, setTransactionType] = useState("deposit")
+  const [transactionType, setTransactionType] = useState("deposit");
   const location = useLocation();
-  // const [accountType, setAccountType] = useState("savings")
-  const [depositType, setDepositType] = useState("cash")
-  const { validate, } = useTransaction();
+  const [depositType, setDepositType] = useState("cash");
+  const { validate } = useTransaction();
   const { deposit } = depositTransaction();
-  const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""])
+  const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
   const [currency, setCurrency] = useState<string>("No currency");
   const [narration, setNarration] = useState<any>("");
   const [senderAccount, setSenderAccount] = useState<any>();
@@ -42,13 +50,12 @@ export default function AccountForm() {
   const [loading, setLoading] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<any>({});
-  const [userType, setUserType] = useState("")
-  const [depositor, /* setDepositor */] = useState<string>("");
+  const [userType, setUserType] = useState("");
+  const [depositor /* setDepositor */] = useState<string>("");
 
   const [chequeValidated, setChequeValidated] = useState<boolean>(false);
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
   const [cheque, setCheque] = useState<string>("");
-
 
   useEffect(() => {
     const currentUser = localStorage.getItem("token");
@@ -67,12 +74,7 @@ export default function AccountForm() {
     } else {
       navigate("/login");
     }
-  }, [
-
-    navigate,
-    location.state.userType,
-  ]);
-
+  }, [navigate, location.state.userType]);
 
   const chequeValidationAction = async () => {
     if (cheque?.length < 0) {
@@ -153,19 +155,26 @@ export default function AccountForm() {
 
   const handleProceed = () => {
     if (userType == CustomerType.Self) {
-      setNarration(`${capitalizeFirstLetter(depositType)} deposit by ${senderAccount?.name}`);
+      setNarration(
+        `${capitalizeFirstLetter(depositType)} deposit by ${
+          senderAccount?.name
+        }`
+      );
     } else {
-      setNarration(`${capitalizeFirstLetter(depositType)} deposit by ${depositor}`);
+      setNarration(
+        `${capitalizeFirstLetter(depositType)} deposit by ${depositor}`
+      );
     }
-    setShowDetailModal(true)
-  }
+    setShowDetailModal(true);
+  };
 
-  const isProceedDisabled = !accountNumber || !senderAccount || !amount || loading || isProcessing;
+  const isProceedDisabled =
+    !accountNumber || !senderAccount || !amount || loading || isProcessing;
 
   const formatCurrency = (value: number, currency: string) => {
     if (!currency || currency === "No currency" || currency === "N/A") {
-      return new Intl.NumberFormat('en-US', {
-        style: 'decimal',
+      return new Intl.NumberFormat("en-US", {
+        style: "decimal",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(value || 0);
@@ -177,8 +186,8 @@ export default function AccountForm() {
       }).format(value);
     } catch (error) {
       console.error("Error formatting currency:", error);
-      return new Intl.NumberFormat('en-US', {
-        style: 'decimal',
+      return new Intl.NumberFormat("en-US", {
+        style: "decimal",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(value);
@@ -198,6 +207,7 @@ export default function AccountForm() {
         .then((res: any) => {
           setIsProcessing(false);
           const responseMessage = res?.description;
+          console.log({ res });
           if (responseMessage === "Imal account inquiry Failed") {
             toast.error(
               DOMPurify.sanitize(responseMessage) || "An error occurred",
@@ -215,9 +225,9 @@ export default function AccountForm() {
             );
             setSenderAccount(null);
           } else {
-            if (res?.data?.currencyname) {
-              setCurrency(res.data.currencyname);
-              setSenderAccount(res.data);
+            if (res?.data?.getaccounts?.currency) {
+              setCurrency(res.data.currency);
+              setSenderAccount(res.data.getaccounts);
             } else {
               setIsProcessing(false);
               toast.error(DOMPurify.sanitize(res?.description), {
@@ -258,7 +268,6 @@ export default function AccountForm() {
     [validate]
   );
 
-
   const onSubmit = async () => {
     setLoading(true);
     const data: any = {
@@ -276,7 +285,6 @@ export default function AccountForm() {
       mobileNumber: senderAccount.mobile,
       bvn: senderAccount?.customerBVN,
       branchNumber: currentUser.BRANCH_CODE,
-
     };
     deposit(data)
       .then((res: any) => {
@@ -326,17 +334,17 @@ export default function AccountForm() {
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length <= 1) {
-      const newOtpValues = [...otpValues]
-      newOtpValues[index] = value
-      setOtpValues(newOtpValues)
+      const newOtpValues = [...otpValues];
+      newOtpValues[index] = value;
+      setOtpValues(newOtpValues);
 
       // Auto-focus next input
       if (value && index < 5) {
-        const nextInput = document.getElementById(`otp-${index + 1}`)
-        nextInput?.focus()
+        const nextInput = document.getElementById(`otp-${index + 1}`);
+        nextInput?.focus();
       }
     }
-  }
+  };
 
   return (
     <>
@@ -347,30 +355,57 @@ export default function AccountForm() {
         <div className="max-w-lg w-full mx-auto bg-white rounded-lg shadow-sm">
           <div className="p-6">
             {/* Back Button */}
-            <button onClick={() => navigate(-1)} className="flex items-center gap-2 mb-6 text-gray-700">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 mb-6 text-gray-700"
+            >
               <ArrowLeft className="w-5 h-5" />
               <span className="font-medium">Back</span>
             </button>
 
-            <h1 className="text-xl font-semibold mb-8 text-gray-900">Customer instructions</h1>
+            <h1 className="text-xl font-semibold mb-8 text-gray-900">
+              Customer instructions
+            </h1>
 
             {/* Transaction Type Selection */}
             <div className="mb-8">
               <div className="border border-gray-200 rounded-lg p-4">
-                <Label className="text-sm font-medium text-gray-700 mb-3 block">Select transaction type</Label>
+                <Label className="text-sm font-medium text-gray-700 mb-3 block">
+                  Select transaction type
+                </Label>
                 <div className="flex gap-2">
                   <Button
-                    variant={transactionType === "deposit" ? "default" : "ghost"}
-                    className={`flex-1 h-12 rounded-md ${transactionType === "deposit" ? "text-blue-700 border-blue-200" : "text-gray-600 hover:bg-gray-50 border-0"}`}
-                    style={{ backgroundColor: transactionType === "deposit" ? "#d5dfff" : "transparent" }}
+                    variant={
+                      transactionType === "deposit" ? "default" : "ghost"
+                    }
+                    className={`flex-1 h-12 rounded-md ${
+                      transactionType === "deposit"
+                        ? "text-blue-700 border-blue-200"
+                        : "text-gray-600 hover:bg-gray-50 border-0"
+                    }`}
+                    style={{
+                      backgroundColor:
+                        transactionType === "deposit"
+                          ? "#d5dfff"
+                          : "transparent",
+                    }}
                     onClick={() => setTransactionType("deposit")}
                   >
                     Deposit
                   </Button>
                   <Button
                     variant="ghost"
-                    className={`flex-1 h-12 rounded-md border-0 ${transactionType === "withdrawal" ? "text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}
-                    style={{ backgroundColor: transactionType === "withdrawal" ? "#d5dfff" : "transparent" }}
+                    className={`flex-1 h-12 rounded-md border-0 ${
+                      transactionType === "withdrawal"
+                        ? "text-blue-700"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                    style={{
+                      backgroundColor:
+                        transactionType === "withdrawal"
+                          ? "#d5dfff"
+                          : "transparent",
+                    }}
                     onClick={() => setTransactionType("withdrawal")}
                   >
                     Withdrawal
@@ -381,7 +416,6 @@ export default function AccountForm() {
 
             {/* Account Number */}
             <div className="mb-6">
-
               <AccountNumberInput
                 type="number"
                 name="accountNumber"
@@ -404,43 +438,50 @@ export default function AccountForm() {
             {loading ? (
               <InlineTextLoader></InlineTextLoader>
             ) : senderAccount ? (
-
               <div className="mb-6">
                 <div className="bg-blue-200 text-gray-700 rounded-md px-4 py-3 space-y-1">
                   <div>
                     <span className="font-bold">Account Name:</span>{" "}
-                    <span className="text-gray-500"> {senderAccount?.name || "N/A"}</span>
+                    <span className="text-gray-500">
+                      {" "}
+                      {senderAccount?.acc_name || "N/A"}
+                    </span>
                   </div>
                   <div>
-                    <span className="font-bold">Account Type:</span> <span className="text-gray-500">{senderAccount?.ledgername || "N/A"}</span>
+                    <span className="font-bold">Account Type:</span>{" "}
+                    <span className="text-gray-500">
+                      {senderAccount?.acc_type || "N/A"}
+                    </span>
                   </div>
                 </div>
               </div>
-
             ) : null}
 
-            {/*  check if ledgername contains current*/}
-            {senderAccount && senderAccount?.ledgername && senderAccount?.ledgername?.toLowerCase().includes(AccountType.Current) && (
-
-              <div className="mb-6">
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">Deposit Type</Label>
-                <Select value={depositType} onValueChange={setDepositType}>
-                  <SelectTrigger className="w-full h-12 rounded-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cash">Cash</SelectItem>
-                    <SelectItem value="cheque">Cheque</SelectItem>
-
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            {/*  check if acc_type contains current*/}
+            {senderAccount &&
+              senderAccount?.acc_type &&
+              senderAccount?.acc_type
+                ?.toLowerCase()
+                .includes(AccountType.Current) && (
+                <div className="mb-6">
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Deposit Type
+                  </Label>
+                  <Select value={depositType} onValueChange={setDepositType}>
+                    <SelectTrigger className="w-full h-12 rounded-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cash">Cash</SelectItem>
+                      <SelectItem value="cheque">Cheque</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
             {/* Cheque Number */}
-            {depositType ==="cheque" && (
+            {depositType === "cheque" && (
               <div className="mb-6">
-
                 <AccountNumberInput
                   type="number"
                   name="chequeNumber"
@@ -459,53 +500,68 @@ export default function AccountForm() {
                   }
                 />
               </div>
-
             )}
             {/* show loading when check is validated, if validated show validated text */}
             {loadingCheque ? (
               <InlineTextLoader></InlineTextLoader>
-            )
-              :
-              chequeValidated ? <div
-                className={`${chequeValidated
-                    ? "text-[#099F4E]"
-                    : "text-[#304DAF]"
-                  } text-bold mt-16 ms-12 cursor-pointer`}
-
+            ) : chequeValidated ? (
+              <div
+                className={`${
+                  chequeValidated ? "text-[#099F4E]" : "text-[#304DAF]"
+                } text-bold mt-16 ms-12 cursor-pointer`}
               >
                 {"Validated"}
-              </div> : null
-
-            }
+              </div>
+            ) : null}
 
             {/* Amount with Currency Dropdown */}
             {senderAccount && (
               <div className="mb-8">
                 <div className="flex gap-3">
-                  {senderAccount && senderAccount?.ledgername && senderAccount?.ledgername?.toLowerCase().includes(AccountType.Current) && (
-                    <div className="flex-1">
-                      <Label className="text-sm font-medium text-gray-700 mb-2 block">Currency</Label>
-                      <Select value={currency} onValueChange={setCurrency}>
-                        <SelectTrigger className="w-full h-12 rounded-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="NGN">NGN</SelectItem>
-                          <SelectItem value="USD" disabled className="text-gray-400">
-                            USD
-                          </SelectItem>
-                          <SelectItem value="EU" disabled className="text-gray-400">
-                            Euro
-                          </SelectItem>
-                          <SelectItem value="P" disabled className="text-gray-400">
-                            Pounds
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
+                  {senderAccount &&
+                    senderAccount?.acc_type &&
+                    senderAccount?.acc_type
+                      ?.toLowerCase()
+                      .includes(AccountType.Current) && (
+                      <div className="flex-1">
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                          Currency
+                        </Label>
+                        <Select value={currency} onValueChange={setCurrency}>
+                          <SelectTrigger className="w-full h-12 rounded-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="NGN">NGN</SelectItem>
+                            <SelectItem
+                              value="USD"
+                              disabled
+                              className="text-gray-400"
+                            >
+                              USD
+                            </SelectItem>
+                            <SelectItem
+                              value="EU"
+                              disabled
+                              className="text-gray-400"
+                            >
+                              Euro
+                            </SelectItem>
+                            <SelectItem
+                              value="P"
+                              disabled
+                              className="text-gray-400"
+                            >
+                              Pounds
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   <div className="flex-1">
-                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Amount</Label>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                      Amount
+                    </Label>
                     <CurrencyInput
                       id="input-example"
                       name="input-name"
@@ -515,7 +571,9 @@ export default function AccountForm() {
                       allowDecimals
                       decimalsLimit={2}
                       allowNegativeValue={false}
-                      onValueChange={(value) => setAmount(value ? Number(value) : 0)}
+                      onValueChange={(value) =>
+                        setAmount(value ? Number(value) : 0)
+                      }
                     />
                     {/* <Input
                       value={amount}
@@ -526,7 +584,6 @@ export default function AccountForm() {
                 </div>
               </div>
             )}
-
 
             {/* Amount */}
             {/* <div className="mb-8">
@@ -563,7 +620,9 @@ export default function AccountForm() {
           <DialogContent className="max-w-md mx-auto p-0 gap-0">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">Deposit information</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Deposit information
+                </h2>
                 {/* <button onClick={() => setShowDetailModal(false)} className="text-gray-400 hover:text-gray-600">
                   <X className="w-5 h-5" />
                 </button> */}
@@ -584,24 +643,29 @@ export default function AccountForm() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Amount</span>
-                  <span className="text-gray-400">{formatCurrency(amount, currency)}</span>
+                  <span className="text-gray-400">
+                    {formatCurrency(amount, currency)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Account Type</span>
-                  <span className="text-gray-400">{senderAccount?.ledgername}</span>
+                  <span className="text-gray-400">
+                    {senderAccount?.acc_type}
+                  </span>
                 </div>
               </div>
 
-              {
-                !loading ? <Button
+              {!loading ? (
+                <Button
                   onClick={onSubmit}
                   disabled={loading}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium"
                 >
                   {loading ? "Processing..." : "Proceed"}
-                </Button> : <ButtonLoaderTransactions />
-
-              }
+                </Button>
+              ) : (
+                <ButtonLoaderTransactions />
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -617,13 +681,20 @@ export default function AccountForm() {
           <DialogContent className="max-w-md mx-auto p-0 gap-0">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">OTP Verification</h2>
-                <button onClick={() => setShowOtpModal(false)} className="text-gray-400 hover:text-gray-600">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  OTP Verification
+                </h2>
+                <button
+                  onClick={() => setShowOtpModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <p className="text-gray-600 text-center mb-8">Please enter the OTP sent to your email or phone number</p>
+              <p className="text-gray-600 text-center mb-8">
+                Please enter the OTP sent to your email or phone number
+              </p>
 
               {/* OTP Input Boxes */}
               <div className="flex justify-center gap-3 mb-6">
@@ -653,6 +724,5 @@ export default function AccountForm() {
         </Dialog>
       </div>
     </>
-
-  )
+  );
 }
