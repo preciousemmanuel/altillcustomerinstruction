@@ -273,9 +273,9 @@ export default function AccountForm() {
     const data: any = {
       accountNumber,
       transactionType: "deposit",
-      currency: senderAccount.currencycode,
+      currency: senderAccount?.currency,
       amount,
-      accountName: senderAccount?.name,
+      accountName: senderAccount?.acc_name,
       transactionId: generate(12),
       accountStatus: "active",
 
@@ -631,7 +631,9 @@ export default function AccountForm() {
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Account Name</span>
-                  <span className="text-gray-400">{senderAccount?.name}</span>
+                  <span className="text-gray-400">
+                    {senderAccount?.acc_name}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Account Number</span>
@@ -639,12 +641,14 @@ export default function AccountForm() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Currency</span>
-                  <span className="text-gray-400">{currency}</span>
+                  <span className="text-gray-400">
+                    {senderAccount?.currency}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Amount</span>
                   <span className="text-gray-400">
-                    {formatCurrency(amount, currency)}
+                    {formatCurrency(amount, senderAccount?.currency)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
