@@ -169,7 +169,12 @@ export default function AccountForm() {
   };
 
   const isProceedDisabled =
-    !accountNumber || !senderAccount || !amount || loading || isProcessing;
+    !accountNumber ||
+    !senderAccount ||
+    !amount ||
+    loading ||
+    isProcessing ||
+    !chequeValidated;
 
   const formatCurrency = (value: number, currency: string) => {
     if (!currency || currency === "No currency" || currency === "N/A") {
@@ -468,7 +473,7 @@ export default function AccountForm() {
                     Deposit Type
                   </Label>
                   <Select value={depositType} onValueChange={setDepositType}>
-                    <SelectTrigger className="w-full h-12 rounded-full">
+                    <SelectTrigger className="w-full !h-12.5 rounded-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -528,7 +533,7 @@ export default function AccountForm() {
                           Currency
                         </Label>
                         <Select value={currency} onValueChange={setCurrency}>
-                          <SelectTrigger className="w-full h-12 rounded-full">
+                          <SelectTrigger className="w-full !h-12.5 rounded-full">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
