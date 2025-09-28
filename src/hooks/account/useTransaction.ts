@@ -8,8 +8,11 @@ export const useTransaction = () => {
       return user;
     };
 
-    
-    return { validate };
+    const glcodesList = async () => {
+      const res = await accountService.getAllGlCodes();
+      return res;
+    };
+    return { validate,glcodesList };
 
 
   };
@@ -29,3 +32,5 @@ export const useTransaction = () => {
     };
     return { validateCheque };
   };
+
+  

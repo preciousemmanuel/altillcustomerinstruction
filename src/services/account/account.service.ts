@@ -137,6 +137,14 @@ export class AccountService {
           return decodeKey(res.data.data)
         })
     }
+
+
+    getAllGlCodes = async () => {
+      const res: any = await this.instance.get("/api/GLCode", {
+        
+      });
+      return decodeKey(res?.data?.data);
+    };
   
    
   }

@@ -28,6 +28,10 @@ import CurrencyInput from "react-currency-input-field";
 import generate, { capitalizeFirstLetter } from "@/utils/randomGenerator";
 import SuccessModal from "@/components/common/SuccessModal";
 import ButtonLoaderTransactions from "@/components/common/buttonLoader";
+import type { GLCodeResponse } from "@/types/glcode";
+import { useGlcodes } from "@/hooks/useGlcode";
+import FullPageLoader from "@/components/common/fullpageloader";
+import FullPageError from "@/components/common/fullpageerror";
 
 export default function AccountForm() {
   const navigate = useNavigate();
@@ -39,7 +43,7 @@ export default function AccountForm() {
   const [transactionType, setTransactionType] = useState("deposit");
   const location = useLocation();
   const [depositType, setDepositType] = useState("cash");
-  const { validate } = useTransaction();
+  const { validate, glcodesList } = useTransaction();
   const { deposit } = depositTransaction();
   const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
   const [currency, setCurrency] = useState<string>("No currency");
@@ -53,9 +57,22 @@ export default function AccountForm() {
   const [userType, setUserType] = useState("");
   const [depositor /* setDepositor */] = useState<string>("");
 
+  const [accountType, setAccountType] = useState<string>("");
+  const [accountSubType, setAccountSubType] = useState<any>("");
+
   const [chequeValidated, setChequeValidated] = useState<boolean>(false);
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
   const [cheque, setCheque] = useState<string>("");
+
+
+  const {
+    glcodes,
+    loadingGlecode,
+    errorGlcode ,
+    corporateGLCodes,
+    individualCurrentGLCodes,
+    savingsIndividualGLCodes,
+  } = useGlcodes(); // autoLoad
 
   useEffect(() => {
     const currentUser = localStorage.getItem("token");
@@ -156,8 +173,7 @@ export default function AccountForm() {
   const handleProceed = () => {
     if (userType == CustomerType.Self) {
       setNarration(
-        `${capitalizeFirstLetter(depositType)} deposit by ${
-          senderAccount?.name
+        `${capitalizeFirstLetter(depositType)} deposit by ${senderAccount?.name
         }`
       );
     } else {
@@ -173,8 +189,8 @@ export default function AccountForm() {
     !senderAccount ||
     !amount ||
     loading ||
-    isProcessing ||
-    !chequeValidated;
+    isProcessing 
+   
 
   const formatCurrency = (value: number, currency: string) => {
     if (!currency || currency === "No currency" || currency === "N/A") {
@@ -208,6 +224,8 @@ export default function AccountForm() {
 
       setLoading(true);
       setSenderAccount(null);
+      setAccountSubType("");
+      setAccountType("");
       validate(accountNumber)
         .then((res: any) => {
           setIsProcessing(false);
@@ -233,6 +251,51 @@ export default function AccountForm() {
             if (res?.data?.getaccounts?.currency) {
               setCurrency(res.data.currency);
               setSenderAccount(res.data.getaccounts);
+              let glAccounType: string;
+              let accountCategory: string;
+              const glcode = res.data.getaccounts.gl_code.toString();
+              console.log("GL CODE ", glcode);
+              console.log("savingsIndividualGLCodes ", savingsIndividualGLCodes);
+              console.log(
+                "individualCurrentGLCodes ",
+                individualCurrentGLCodes
+              );
+              console.log("corporateGLCodes ", corporateGLCodes);
+
+              if (savingsIndividualGLCodes?.includes(glcode)) {
+                glAccounType = "savings";
+                accountCategory = "savings";
+                setAccountSubType(accountCategory);
+                setAccountType(glAccounType);
+              } else if (individualCurrentGLCodes.includes(glcode)) {
+                glAccounType = "current";
+                accountCategory = "individual_current";
+                setAccountSubType(accountCategory);
+                setAccountType(glAccounType);
+              } else if (corporateGLCodes.includes(glcode)) {
+                glAccounType = "current";
+                accountCategory = "corporate";
+                setAccountSubType(accountCategory);
+                setAccountType(glAccounType);
+              } else {
+                setSenderAccount({});
+                setAccountNumber("");
+                toast.error("Invalid Account Type", {
+                  position: "top-right",
+                  autoClose: 5000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "light",
+                  transition: Bounce,
+                });
+
+                glAccounType = "disabled";
+                accountCategory = "disabled";
+                setAccountSubType(accountCategory);
+              }
             } else {
               setIsProcessing(false);
               toast.error(DOMPurify.sanitize(res?.description), {
@@ -351,6 +414,10 @@ export default function AccountForm() {
     }
   };
 
+  if(loadingGlecode) return <FullPageLoader />
+
+  if(errorGlcode) return <FullPageError message={errorGlcode} />
+
   return (
     <>
       <ToastContainer />
@@ -383,11 +450,10 @@ export default function AccountForm() {
                     variant={
                       transactionType === "deposit" ? "default" : "ghost"
                     }
-                    className={`flex-1 h-12 rounded-md ${
-                      transactionType === "deposit"
+                    className={`flex-1 h-12 rounded-md ${transactionType === "deposit"
                         ? "text-blue-700 border-blue-200"
                         : "text-gray-600 hover:bg-gray-50 border-0"
-                    }`}
+                      }`}
                     style={{
                       backgroundColor:
                         transactionType === "deposit"
@@ -400,11 +466,10 @@ export default function AccountForm() {
                   </Button>
                   <Button
                     variant="ghost"
-                    className={`flex-1 h-12 rounded-md border-0 ${
-                      transactionType === "withdrawal"
+                    className={`flex-1 h-12 rounded-md border-0 ${transactionType === "withdrawal"
                         ? "text-blue-700"
                         : "text-gray-600 hover:bg-gray-50"
-                    }`}
+                      }`}
                     style={{
                       backgroundColor:
                         transactionType === "withdrawal"
@@ -463,11 +528,9 @@ export default function AccountForm() {
             ) : null}
 
             {/*  check if acc_type contains current*/}
-            {senderAccount &&
-              senderAccount?.acc_type &&
-              senderAccount?.acc_type
-                ?.toLowerCase()
-                .includes(AccountType.Current) && (
+            {(senderAccount &&
+              accountType== AccountType.Current)
+              && (
                 <div className="mb-6">
                   <Label className="text-sm font-medium text-gray-700 mb-2 block">
                     Deposit Type
@@ -511,9 +574,8 @@ export default function AccountForm() {
               <InlineTextLoader></InlineTextLoader>
             ) : chequeValidated ? (
               <div
-                className={`${
-                  chequeValidated ? "text-[#099F4E]" : "text-[#304DAF]"
-                } text-bold mt-16 ms-12 cursor-pointer`}
+                className={`${chequeValidated ? "text-[#099F4E]" : "text-[#304DAF]"
+                  } text-bold mt-16 ms-12 cursor-pointer`}
               >
                 {"Validated"}
               </div>
