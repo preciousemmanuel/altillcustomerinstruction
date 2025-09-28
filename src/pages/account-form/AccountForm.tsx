@@ -55,7 +55,7 @@ export default function AccountForm() {
   const [amount, setAmount] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<any>({});
   const [userType, setUserType] = useState("");
-  const [depositor /* setDepositor */] = useState<string>("");
+  const [depositor , setDepositor ] = useState<string|null>("");
 
   const [accountType, setAccountType] = useState<string>("");
   const [accountSubType, setAccountSubType] = useState<any>("");
@@ -172,11 +172,13 @@ export default function AccountForm() {
 
   const handleProceed = () => {
     if (userType == CustomerType.Self) {
+      setDepositor(senderAccount?.name);
       setNarration(
         `${capitalizeFirstLetter(depositType)} deposit by ${senderAccount?.name
         }`
       );
     } else {
+      setDepositor(null);
       setNarration(
         `${capitalizeFirstLetter(depositType)} deposit by ${depositor}`
       );
