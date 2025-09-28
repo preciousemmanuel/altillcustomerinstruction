@@ -6,7 +6,8 @@ export const DepositType = {
 
 export const AccountType = {
     Savings: "saving",
-    Current: "current",
+    Current: "Individual",
+    //Current: "current",
 } as const;
 
 export const CustomerType = {
