@@ -4,7 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast, ToastContainer } from "react-toastify";
 
-export default function Withdrawal({ userType }: { userType: string }) {
+interface WithdrawalProps {
+  userType: string;
+  corporateGLCodes: string[];
+  individualCurrentGLCodes: string[];
+  savingsIndividualGLCodes: string[];
+}
+
+export default function Withdrawal({
+  userType,
+  corporateGLCodes,
+  individualCurrentGLCodes,
+  savingsIndividualGLCodes,
+}: WithdrawalProps) {
   const handleProceed = () => {
     toast.info("Withdrawal functionality is not yet implemented.", {
       position: "top-right",

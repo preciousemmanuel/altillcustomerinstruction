@@ -28,12 +28,20 @@ import CurrencyInput from "react-currency-input-field";
 import generate, { capitalizeFirstLetter } from "@/utils/randomGenerator";
 import SuccessModal from "@/components/common/SuccessModal";
 import ButtonLoaderTransactions from "@/components/common/buttonLoader";
-import type { GLCodeResponse } from "@/types/glcode";
-import { useGlcodes } from "@/hooks/useGlcode";
-import FullPageLoader from "@/components/common/fullpageloader";
-import FullPageError from "@/components/common/fullpageerror";
 
-export default function Deposit({ userType }: { userType: string }) {
+interface DepositProps {
+  userType: string;
+  corporateGLCodes: string[];
+  individualCurrentGLCodes: string[];
+  savingsIndividualGLCodes: string[];
+}
+
+export default function Deposit({
+  userType,
+  corporateGLCodes,
+  individualCurrentGLCodes,
+  savingsIndividualGLCodes,
+}: DepositProps) {
   const navigate = useNavigate();
   const { validateCheque } = chequeValidation();
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -61,15 +69,6 @@ export default function Deposit({ userType }: { userType: string }) {
   const [chequeValidated, setChequeValidated] = useState<boolean>(false);
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
   const [cheque, setCheque] = useState<string>("");
-
-  const {
-    glcodes,
-    loadingGlecode,
-    errorGlcode,
-    corporateGLCodes,
-    individualCurrentGLCodes,
-    savingsIndividualGLCodes,
-  } = useGlcodes();
 
   useEffect(() => {
     const currentUser = localStorage.getItem("token");
@@ -392,10 +391,6 @@ export default function Deposit({ userType }: { userType: string }) {
       }
     }
   };
-
-  if (loadingGlecode) return <FullPageLoader />;
-
-  if (errorGlcode) return <FullPageError message={errorGlcode} />;
 
   return (
     <>
