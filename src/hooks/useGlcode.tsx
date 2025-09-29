@@ -15,18 +15,18 @@ export const useGlcodes = (autoLoad = true) => {
     try {
       setLoading(true);
       setError(null);
-      // make sure glcodesList is stable (from a hook or service)
-      const response = (await glcodesList()) as GLCodeResponse|null;
-      setGlcodes(response);
-      if (!response) {
-        throw new Error("No GL codes found");
+      const response = (await glcodesList()) as GLCodeResponse | null;
+      if (response) {
+        setGlcodes(response);
+      } else {
+        throw new Error("Failed to fetch GL codes");
       }
-    } catch (err:any) {
+    } catch (err: any) {
       setError(err.message || "An error occurred while fetching GL codes.");
     } finally {
       setLoading(false);
     }
-  }, []); // no deps → won't change on every render
+  }, [glcodesList]);
 
   useEffect(() => {
     if (autoLoad) {

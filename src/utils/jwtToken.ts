@@ -68,16 +68,31 @@ export async function decodeData(
   }
 }
 
-export function toLowerCaseKeys<T extends Record<string, any>>(obj: T): T {
+function _toLowerCaseKeys<T extends Record<string, any>>(
+  obj: T,
+  visited: Set<any>
+): T {
+  if (visited.has(obj)) {
+    return obj; // Circular reference detected, return object as is.
+  }
+  if(obj) visited.add(obj);
+
   return Object.fromEntries(
     Object.entries(obj).map(([key, value]) => [
       key.toLowerCase(),
       value && typeof value === "object" && !Array.isArray(value)
-        ? toLowerCaseKeys(value)
+        ? _toLowerCaseKeys(value, visited)
         : value,
     ])
   ) as T;
 }
+
+
+export function toLowerCaseKeys<T extends Record<string, any>>(obj: T): T {
+  if(!obj) return obj
+  return _toLowerCaseKeys(obj, new Set());
+}
+
 
 export function toUpperCaseKeys<T extends Record<string, any>>(obj: T): T {
   return Object.fromEntries(
