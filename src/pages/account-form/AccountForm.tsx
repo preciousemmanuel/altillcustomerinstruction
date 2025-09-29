@@ -14,6 +14,9 @@ import {
 import Deposit from "@/components/account/Deposit";
 import Withdrawal from "@/components/account/Withdrawal";
 import { useState, useEffect } from "react";
+import { useGlcodes } from "@/hooks/useGlcode";
+import FullPageLoader from "@/components/common/fullpageloader";
+import FullPageError from "@/components/common/fullpageerror";
 
 export default function AccountForm() {
   const navigate = useNavigate();
@@ -21,11 +24,22 @@ export default function AccountForm() {
   const [transactionType, setTransactionType] = useState("deposit");
   const userType = location.state?.userType;
 
+  const {
+    loadingGlecode,
+    errorGlcode,
+    corporateGLCodes,
+    individualCurrentGLCodes,
+    savingsIndividualGLCodes,
+  } = useGlcodes();
+
   useEffect(() => {
     if (!userType) {
       navigate("/home");
     }
   }, [userType, navigate]);
+
+  if (loadingGlecode) return <FullPageLoader />;
+  if (errorGlcode) return <FullPageError message={errorGlcode} />;
 
   return (
     <>
@@ -73,10 +87,20 @@ export default function AccountForm() {
                 </div>
               </div>
               <TabsContent value="deposit">
-                <Deposit userType={userType} />
+                <Deposit
+                  userType={userType}
+                  corporateGLCodes={corporateGLCodes}
+                  individualCurrentGLCodes={individualCurrentGLCodes}
+                  savingsIndividualGLCodes={savingsIndividualGLCodes}
+                />
               </TabsContent>
               <TabsContent value="withdrawal">
-                <Withdrawal userType={userType} />
+                <Withdrawal
+                  userType={userType}
+                  corporateGLCodes={corporateGLCodes}
+                  individualCurrentGLCodes={individualCurrentGLCodes}
+                  savingsIndividualGLCodes={savingsIndividualGLCodes}
+                />
               </TabsContent>
             </Tabs>
           </div>
