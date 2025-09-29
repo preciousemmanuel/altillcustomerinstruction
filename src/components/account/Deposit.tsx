@@ -18,12 +18,13 @@ import DOMPurify from "dompurify";
 import {
   chequeValidation,
   depositTransaction,
+  chequeDepositTransaction,
   useTransaction,
 } from "../../hooks/account/useTransaction";
 import AccountNumberInput from "@/components/common/accountNumberInput";
 import { sanitizeInput } from "@/utils/sanitizer";
 import InlineTextLoader from "@/components/common/inlineTextLoader";
-import { AccountType, CustomerType } from "@/utils/base.enum";
+import { AccountType, CustomerType, DepositType } from "@/utils/base.enum";
 import CurrencyInput from "react-currency-input-field";
 import generate, { capitalizeFirstLetter } from "@/utils/randomGenerator";
 import SuccessModal from "@/components/common/SuccessModal";
@@ -52,6 +53,7 @@ export default function Deposit({
   const [depositType, setDepositType] = useState("cash");
   const { validate, glcodesList } = useTransaction();
   const { deposit } = depositTransaction();
+  const { chequeDeposit } = chequeDepositTransaction();
   const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
   const [currency, setCurrency] = useState<string>("No currency");
   const [narration, setNarration] = useState<any>("");
@@ -59,10 +61,12 @@ export default function Deposit({
   const [accountNumber, setAccountNumber] = useState<any>();
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [beneficiaryLoading, setBeneficiaryLoading] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<any>({});
   const [depositor, setDepositor] = useState<string | null>("");
-
+  const [benefiaryAccountNumber, setBenefiaryAccountNumber] = useState<any>();
+  const [benefiaryAccount, setBenefiaryAccount] = useState<any>();
   const [accountType, setAccountType] = useState<string>("");
   const [accountSubType, setAccountSubType] = useState<any>("");
 
@@ -157,24 +161,27 @@ export default function Deposit({
   };
 
   const handleProceed = () => {
-    if (userType == CustomerType.Self) {
-      setDepositor(senderAccount?.name);
-      setNarration(
-        `${capitalizeFirstLetter(depositType)} deposit by ${
-          senderAccount?.name
-        }`
-      );
-    } else {
-      setDepositor(null);
-      setNarration(
-        `${capitalizeFirstLetter(depositType)} deposit by ${depositor}`
-      );
+
+    if (depositType != "cheque") {
+      if (userType == CustomerType.Self) {
+        setDepositor(senderAccount?.name);
+        setNarration(
+          `${capitalizeFirstLetter(depositType)} deposit by ${senderAccount?.name
+          }`
+        );
+      } else {
+        setDepositor(null);
+        setNarration(
+          `${capitalizeFirstLetter(depositType)} deposit by ${depositor}`
+        );
+      }
+
     }
     setShowDetailModal(true);
   };
 
   const isProceedDisabled =
-    !accountNumber || !senderAccount || !amount || loading || isProcessing;
+    !accountNumber || !senderAccount || !amount || loading || isProcessing||(accountType == AccountType.Current && depositType == DepositType.Cheque && !chequeValidated);
 
   const formatCurrency = (value: number, currency: string) => {
     if (!currency || currency === "No currency" || currency === "N/A") {
@@ -320,6 +327,87 @@ export default function Deposit({
     [validate]
   );
 
+
+
+
+  const validateBeneficiaryAccount = useCallback(
+    (accountNumber: string) => {
+      if (!accountNumber) {
+        setBenefiaryAccount(null);
+        return;
+      }
+
+      setBeneficiaryLoading(true);
+      setBenefiaryAccount(null);
+
+      validate(accountNumber)
+        .then((res: any) => {
+          setIsProcessing(false);
+          const responseMessage = res?.description;
+          console.log({ res });
+          if (responseMessage === "Imal account inquiry Failed") {
+            toast.error(
+              DOMPurify.sanitize(responseMessage) || "An error occurred",
+              {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Bounce,
+              }
+            );
+            setBenefiaryAccount(null);
+          } else {
+            if (res?.data?.getaccounts?.currency) {
+
+              setBenefiaryAccount(res.data.getaccounts);
+
+            } else {
+              setIsProcessing(false);
+              toast.error(DOMPurify.sanitize(res?.description), {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Bounce,
+              });
+            }
+          }
+          setBeneficiaryLoading(false);
+        })
+        .catch((e) => {
+
+          setBenefiaryAccount(null);
+          setBeneficiaryLoading(false);
+          toast.error(
+            DOMPurify.sanitize(e?.response?.data) || "An error occurred",
+            {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+              transition: Bounce,
+            }
+          );
+        });
+    },
+    [validate]
+  );
+
+
+
   const onSubmit = async () => {
     setLoading(true);
     const data: any = {
@@ -339,6 +427,68 @@ export default function Deposit({
       branchNumber: currentUser.BRANCH_CODE,
     };
     deposit(data)
+      .then((res: any) => {
+        console.log("Deposit response: ", res);
+        setLoading(false);
+        if (res?.sucesss === false) {
+          toast.error(DOMPurify.sanitize(res?.message || "An error occurred"), {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          });
+        } else {
+          setShowDetailModal(false);
+          setQueueNumber(res?.data!.queuenumber || "");
+          setShowSuccessModal(true);
+        }
+      })
+      .catch((e) => {
+        toast.error(
+          DOMPurify.sanitize(e?.response?.data?.title || "An error occurred"),
+          {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          }
+        );
+        setLoading(false);
+      });
+  };
+
+
+  const onSubmitCheque = async () => {
+    setLoading(true);
+    const data: any = {
+      fromAccount: accountNumber,
+      transactionType: "Cheque Deposit",
+      toAccount: benefiaryAccountNumber,
+      senderName: senderAccount?.acc_name,
+      recipientName: benefiaryAccount?.acc_name,
+      chequeNumber: cheque,
+      chequeType: "",
+      currency: senderAccount?.currency,
+      amount,
+
+      transactionId: generate(12),
+
+      narration: narration,
+
+      bvn: senderAccount?.bvn,
+      branchCode: currentUser.BRANCH_CODE,
+    };
+    chequeDeposit(data)
       .then((res: any) => {
         console.log("Deposit response: ", res);
         setLoading(false);
@@ -481,22 +631,63 @@ export default function Deposit({
             <InlineTextLoader></InlineTextLoader>
           ) : chequeValidated ? (
             <div
-              className={`${
-                chequeValidated ? "text-[#099F4E]" : "text-[#304DAF]"
-              } text-bold mt-16 ms-12 cursor-pointer`}
+              className={`${chequeValidated ? "text-[#099F4E]" : "text-[#304DAF]"
+                } text-bold ml-0 mb-6 mt-0 ms-5 cursor-pointer`}
             >
-              {"Validated"}
+              {"Cheque number Validated"}
             </div>
           ) : null}
+
+          {(senderAccount && accountType == AccountType.Current && chequeValidated === true) && <div>
+            <div className="mb-6">
+              <AccountNumberInput
+                type="number"
+                name="accountNumber"
+                id="beneficiaryAccountNumber"
+                value={benefiaryAccountNumber}
+                handleChange={(e) => setBenefiaryAccountNumber(e.target.value)}
+                handleInput={(e) => {
+                  e.target.value = sanitizeInput(e.target.value);
+                }}
+                onBlur={() => validateBeneficiaryAccount(benefiaryAccountNumber)}
+                labelText={"Beneficiary Account Number"}
+                labelFor={""}
+                placeholder={"Please enter beneficiary account number"}
+                customClass={
+                  "bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
+                }
+              />
+            </div>
+
+            {beneficiaryLoading ? (
+              <InlineTextLoader></InlineTextLoader>
+            ) : benefiaryAccount ? (
+              <div className="mb-6">
+                <div className="bg-blue-200 text-gray-700 rounded-md px-4 py-3 space-y-1">
+                  <div>
+                    <span className="font-bold">Account Name:</span>{" "}
+                    <span className="text-gray-500">
+                      {" "}
+                      {benefiaryAccount?.acc_name || "N/A"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-bold">Account Type:</span>{" "}
+                    <span className="text-gray-500">
+                      {benefiaryAccount?.acc_type || "N/A"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+          </div>}
 
           {senderAccount && (
             <div className="mb-8">
               <div className="flex gap-3">
-                {senderAccount &&
-                  senderAccount?.acc_type &&
-                  senderAccount?.acc_type
-                    ?.toLowerCase()
-                    .includes(AccountType.Current) && (
+                {(senderAccount &&
+                  accountType == AccountType.Current) && (
                     <div className="flex-1">
                       <Label className="text-sm font-medium text-gray-700 mb-2 block">
                         Currency
@@ -553,6 +744,20 @@ export default function Deposit({
               </div>
             </div>
           )}
+
+          {(accountNumber && benefiaryAccountNumber && amount && chequeValidated) ? (
+            <div className="mt-4 mb-4">
+              <div className="text-bold" style={{ color: "#000000" }}>
+                Narration
+              </div>
+              <textarea
+                className="bg-[#F4F6FF] h-[80px] border border-gray-200 text-gray-900 sm:text-sm focus:ring-primary-600 focus:border-primary-600 block w-full p-2"
+                placeholder="Enter narration"
+                value={narration}
+                onChange={(e) => setNarration(e.target.value)}
+              />
+            </div>
+          ) : null}
 
           <div className="flex gap-3">
             <Button
@@ -611,11 +816,37 @@ export default function Deposit({
                   {senderAccount?.acc_type}
                 </span>
               </div>
+
+
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Deposit Type</span>
+                <span className="text-gray-400">
+                  {depositType.toLocaleUpperCase()} Deposit
+                </span>
+              </div>
+
+              {benefiaryAccount && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Beneficiary account number</span>
+                  <span className="text-gray-400">
+                    {benefiaryAccountNumber}
+                  </span>
+                </div>
+              )}
+
+              {benefiaryAccount && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Beneficiary Name</span>
+                  <span className="text-gray-400">
+                    {benefiaryAccount?.acc_name}
+                  </span>
+                </div>
+              )}
             </div>
 
             {!loading ? (
               <Button
-                onClick={onSubmit}
+                onClick={accountType == AccountType.Current && depositType == DepositType.Cheque ? onSubmitCheque : onSubmit}
                 disabled={loading}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium"
               >

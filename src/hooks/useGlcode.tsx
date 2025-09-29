@@ -17,6 +17,7 @@ export const useGlcodes = (autoLoad = true) => {
       setError(null);
       const response = (await glcodesList()) as GLCodeResponse | null;
       if (response) {
+        console.log("Fetched GL codes:", response);
         setGlcodes(response);
       } else {
         throw new Error("Failed to fetch GL codes");

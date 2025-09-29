@@ -53,9 +53,9 @@ function Landing() {
   );
 
   const handleProceed = () => {
-    if (selectedOption === CustomerType.Self) {
+    // if (selectedOption === CustomerType.Self) {
       navigate("/account-form", { state: {userType: selectedOption } });
-    }
+  //  }
   };
 
   return (

@@ -23,6 +23,14 @@ export const useTransaction = () => {
     return { deposit };
   };
 
+  export const chequeDepositTransaction = () => {
+    const chequeDeposit = async (data: any) => {
+      const user = await accountService.chequeDeposit(data);
+      return user;
+    };
+    return { chequeDeposit };
+  };
+
   export const chequeValidation = () => {
     const validateCheque = async (Cheque: any, accountNumber: any) => {
       const response = await accountService.validateCheque(Cheque, accountNumber);

@@ -1,6 +1,6 @@
 export const DepositType = {
     Cash: "cash",
-    Cheque: "Cheque",
+    Cheque: "cheque",
 } as const;
 
 
