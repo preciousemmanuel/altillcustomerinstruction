@@ -263,7 +263,7 @@ export default function Deposit({ userType }: { userType: string }) {
                 setAccountSubType(accountCategory);
                 setAccountType(glAccounType);
               } else {
-                setSenderAccount({});
+                setSenderAccount(null);
                 setAccountNumber("");
                 toast.error("Invalid Account Type", {
                   position: "top-right",
@@ -300,7 +300,7 @@ export default function Deposit({ userType }: { userType: string }) {
         })
         .catch((e) => {
           setCurrency("N/A");
-          setSenderAccount({});
+          setSenderAccount(null);
           setLoading(false);
           toast.error(
             DOMPurify.sanitize(e?.response?.data) || "An error occurred",

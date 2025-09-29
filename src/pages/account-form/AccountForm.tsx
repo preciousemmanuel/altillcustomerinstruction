@@ -49,7 +49,7 @@ export default function AccountForm() {
             <Tabs
               defaultValue="deposit"
               className="w-full"
-              onValueChange={(value) => setTransactionType(value)}
+              onValueChange={(value:any) => setTransactionType(value)}
             >
               <div className="mb-4">
                 <div className="border border-gray-200 rounded-lg p-4">
