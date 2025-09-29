@@ -38,6 +38,7 @@ function InputWithLabel({
       <Input
         type={type}
         id={name}
+        name={name}
         placeholder={placeholder}
         className="rounded-full h-12 focus-visible:border-[#304DAF]"
         onChange={handleChange}

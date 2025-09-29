@@ -1,12 +1,13 @@
 export const DepositType = {
     Cash: "cash",
-    Cheque: "Cheque",
+    Cheque: "cheque",
 } as const;
 
 
 export const AccountType = {
-    Savings: "saving",
+    Savings: "savings",
     Current: "current",
+    //Current: "current",
 } as const;
 
 export const CustomerType = {

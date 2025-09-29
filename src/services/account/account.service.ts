@@ -79,6 +79,17 @@ export class AccountService {
           return decodeKey(res.data.data)
         })
     }
+
+    chequeDeposit = async (data: any) => {
+      const tokenatedData: any = await generateKey(data)
+      return this.instance
+        .post('api/CustomerInstruction/QueueChequeDeposit', { data: tokenatedData }, {
+          
+        })
+        .then(res => {
+          return decodeKey(res.data.data)
+        })
+    }
   
     withdraw = async (data: any) => {
       const tokenatedData: any = await generateKey(data)
@@ -137,6 +148,14 @@ export class AccountService {
           return decodeKey(res.data.data)
         })
     }
+
+
+    getAllGlCodes = async () => {
+      const res: any = await this.instance.get("/api/GLCode", {
+        
+      });
+      return decodeKey(res?.data?.data);
+    };
   
    
   }
