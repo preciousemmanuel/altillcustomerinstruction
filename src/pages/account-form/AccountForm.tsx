@@ -1,7 +1,6 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { ToastContainer } from "react-toastify";
@@ -13,7 +12,7 @@ import {
 } from "@/components/ui/tabs";
 import Deposit from "@/components/account/Deposit";
 import Withdrawal from "@/components/account/Withdrawal";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useGlcodes } from "@/hooks/useGlcode";
 import FullPageLoader from "@/components/common/fullpageloader";
 import FullPageError from "@/components/common/fullpageerror";
@@ -21,7 +20,6 @@ import FullPageError from "@/components/common/fullpageerror";
 export default function AccountForm() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [transactionType, setTransactionType] = useState("deposit");
   const userType = location.state?.userType;
 
   const {
@@ -63,7 +61,6 @@ export default function AccountForm() {
             <Tabs
               defaultValue="deposit"
               className="w-full"
-              onValueChange={(value:any) => setTransactionType(value)}
             >
               <div className="mb-4">
                 <div className="border border-gray-200 rounded-lg p-4">
