@@ -16,6 +16,7 @@ interface DecodedDataResponse {
   };
 }
 
+// TODO: Add to component library.
 function InputWithLabel({
   name,
   label,
@@ -37,6 +38,7 @@ function InputWithLabel({
       <Input
         type={type}
         id={name}
+        name={name}
         placeholder={placeholder}
         className="rounded-full h-12 focus-visible:border-[#304DAF]"
         onChange={handleChange}
@@ -118,7 +120,7 @@ function LoginForm() {
       <Button
         className="w-full bg-[#304DAF] py-8 text-white rounded-full text-lg mt-4 cursor-pointer hover:opacity-50"
         type="button"
-        disabled={!token || !userName || !password}
+        disabled={!token.trim() || !userName.trim() || !password.trim()}
         onClick={() => handleLogin()}
       >
         {isLoading ? <LoaderCircle className="animate-spin" /> : "Login"}
@@ -129,10 +131,12 @@ function LoginForm() {
 
 export default function Login() {
   return (
-    <div className="mt-12 w-[70%] lg:w-[60%] xl:w-[40%] mx-auto rounded-xl bg-white p-10">
-      <h3 className="font-bold text-lg">Welcome</h3>
-      <p className="mb-12">Log in with your Alternative ID</p>
-      <LoginForm />
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md mx-auto rounded-xl bg-white p-10">
+        <h3 className="font-bold text-lg">Welcome</h3>
+        <p className="mb-12">Log in with your Alternative ID</p>
+        <LoginForm />
+      </div>
     </div>
   );
 }
