@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import {
@@ -49,9 +49,8 @@ export default function Deposit({
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [queueNumber, setQueueNumber] = useState("");
-  const [transactionType, setTransactionType] = useState("deposit");
   const [depositType, setDepositType] = useState("cash");
-  const { validate, glcodesList } = useTransaction();
+  const { validate } = useTransaction();
   const { deposit } = depositTransaction();
   const { chequeDeposit } = chequeDepositTransaction();
   const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
@@ -68,7 +67,6 @@ export default function Deposit({
   const [benefiaryAccountNumber, setBenefiaryAccountNumber] = useState<any>();
   const [benefiaryAccount, setBenefiaryAccount] = useState<any>();
   const [accountType, setAccountType] = useState<string>("");
-  const [accountSubType, setAccountSubType] = useState<any>("");
 
   const [chequeValidated, setChequeValidated] = useState<boolean>(false);
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
@@ -215,7 +213,6 @@ export default function Deposit({
 
       setLoading(true);
       setSenderAccount(null);
-      setAccountSubType("");
       setAccountType("");
       validate(accountNumber)
         .then((res: any) => {
@@ -243,7 +240,6 @@ export default function Deposit({
               setCurrency(res.data.currency);
               setSenderAccount(res.data.getaccounts);
               let glAccounType: string;
-              let accountCategory: string;
               const glcode = res.data.getaccounts.gl_code.toString();
               console.log("GL CODE ", glcode);
               console.log("savingsIndividualGLCodes ", savingsIndividualGLCodes);
@@ -255,18 +251,12 @@ export default function Deposit({
 
               if (savingsIndividualGLCodes?.includes(glcode)) {
                 glAccounType = "savings";
-                accountCategory = "savings";
-                setAccountSubType(accountCategory);
                 setAccountType(glAccounType);
               } else if (individualCurrentGLCodes.includes(glcode)) {
                 glAccounType = "current";
-                accountCategory = "individual_current";
-                setAccountSubType(accountCategory);
                 setAccountType(glAccounType);
               } else if (corporateGLCodes.includes(glcode)) {
                 glAccounType = "current";
-                accountCategory = "corporate";
-                setAccountSubType(accountCategory);
                 setAccountType(glAccounType);
               } else {
                 setSenderAccount(null);
@@ -284,8 +274,6 @@ export default function Deposit({
                 });
 
                 glAccounType = "disabled";
-                accountCategory = "disabled";
-                setAccountSubType(accountCategory);
               }
             } else {
               setIsProcessing(false);
