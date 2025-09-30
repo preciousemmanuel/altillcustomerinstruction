@@ -11,12 +11,7 @@ interface WithdrawalProps {
   savingsIndividualGLCodes: string[];
 }
 
-export default function Withdrawal({
-  userType,
-  corporateGLCodes,
-  individualCurrentGLCodes,
-  savingsIndividualGLCodes,
-}: WithdrawalProps) {
+export default function Withdrawal(_props: WithdrawalProps) {
   const handleProceed = () => {
     toast.info("Withdrawal functionality is not yet implemented.", {
       position: "top-right",
