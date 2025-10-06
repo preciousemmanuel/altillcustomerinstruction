@@ -12,7 +12,18 @@ export const useTransaction = () => {
     return res;
   }, []);
 
-  return { validate, glcodesList };
+
+  
+
+  return { validate, glcodesList};
+};
+
+export const limitCBNAction = () => {
+  const limitCBN = async (data: any) => {
+    const user = await accountService.limitCBN(data);
+    return user;
+  };
+  return { limitCBN };
 };
 
   export const depositTransaction = () => {
@@ -29,6 +40,14 @@ export const useTransaction = () => {
       return user;
     };
     return { chequeDeposit };
+  };
+
+  export const savingsWithdrawalTransaction = () => {
+    const savingsWithdrawal = async (data: any) => {
+      const user = await accountService.withdraw(data);
+      return user;
+    };
+    return { savingsWithdrawal };
   };
 
   export const chequeValidation = () => {
