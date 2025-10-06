@@ -35,16 +35,7 @@ import PhoneNumberInputs from "../common/phonenumberInput";
 import BVNNumberInputs from "../common/bvninput";
 
 
-interface SenderAccount {
-  acc_name: string;
-  acc_type: string;
-  aval_balance: number;
-  bvn: string;
-  cif_sub_no: string;
-  currency: string;
-  currency_code: string;
-  gl_code: string;
-}
+
 
 interface CbnLimitResponse {
   description: string;
