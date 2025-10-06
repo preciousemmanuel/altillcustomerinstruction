@@ -14,3 +14,8 @@ export const CustomerType = {
     Self: "self",
     ThirdParty: "thirdParty",
 } as const;
+
+export const ChequeType = {
+    Cheque: "cheque",
+    Counter: "counter",
+} as const;

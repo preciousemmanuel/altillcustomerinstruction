@@ -6,14 +6,23 @@ import { toast, ToastContainer, Bounce } from "react-toastify";
 import AccountNumberInput from "../common/accountNumberInput";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { InfoCircle } from "iconsax-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import DOMPurify from "dompurify";
 import {
   limitCBNAction,
   useTransaction,
-  savingsWithdrawalTransaction
+  savingsWithdrawalTransaction,
+  chequeWithdrawalTransaction,
+  chequeValidation
 } from "../../hooks/account/useTransaction";
 import { sanitizeInput } from "@/utils/sanitizer";
-import { AccountType, CustomerType, DepositType } from "@/utils/base.enum";
+import { AccountType, ChequeType, CustomerType } from "@/utils/base.enum";
 import CurrencyInput from "react-currency-input-field";
 import InlineTextLoader from "../common/inlineTextLoader";
 import { formatCurrency } from "@/utils/helper";
@@ -21,6 +30,10 @@ import ButtonLoaderTransactions from "../common/buttonLoader";
 import generate from "@/utils/randomGenerator";
 import { useNavigate } from "react-router-dom";
 import SuccessModal from "../common/SuccessModal";
+
+import PhoneNumberInputs from "../common/phonenumberInput";
+import BVNNumberInputs from "../common/bvninput";
+
 
 interface WithdrawalProps {
   userType: string;
@@ -45,7 +58,9 @@ export default function Withdrawal({
   const [loading, setLoading] = useState<boolean>(false);
   const { validate } = useTransaction();
   const { limitCBN } = limitCBNAction();
+  const { validateCheque } = chequeValidation();
   const { savingsWithdrawal } = savingsWithdrawalTransaction();
+  const { chequeWithdrawal } = chequeWithdrawalTransaction();
   const [amount, setAmount] = useState<number>(0);
   const [narration, setNarration] = useState<any>("");
   const [responseMessage, setResponseMessage] = useState<string>("");
@@ -57,8 +72,15 @@ export default function Withdrawal({
   const [queueNumber, setQueueNumber] = useState("");
   const [resp, setResp] = useState<any>();
   const [currentUser, setCurrentUser] = useState<any>({});
+  const [chequeType, setChequeType] = useState<string>("");
+  const [cheque, setCheque] = useState<string>("");
+  const [chequeValidated, setChequeValidated] = useState<boolean>(false);
+  const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
+  const [beneficiary, setBeneficiary] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
+  const [bvn, setBVN] = useState<string>("ß");
   const navigate = useNavigate();
-  let timeout: NodeJS.Timeout; // Store timeout reference
+
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null); // Store timeout reference
 
@@ -282,40 +304,20 @@ export default function Withdrawal({
     // });
   };
 
-
-  const onSubmitSavingsWithdrawal = async () => {
-    setLoading(true);
-    const data: any = {
-      accountNumber,
-      transactionType: accountType===AccountType.Savings? "Savings withdrawal":userType,
-      currency: senderAccount?.currency,
-      accountType: accountType,
-      amount,
-     accountName: senderAccount?.acc_name,
-      nuban:accountNumber,
-      transactionId: generate(12),
-      accountStatus: "active",
-      isThirdparty:userType === CustomerType.ThirdParty ? true : false,
-      
-      narration: narration,
-      //mobileNumber:userType===CustomerType.Self? senderAccount.mobile: depositorPhone,
-      bvn: senderAccount?.bvn,
-      branchCode: currentUser.BRANCH_CODE,
-
-      isWithinLimit: resp?.description == "Transaction within limit" ||
-      resp?.description.includes("Transaction within limit")
-      ? true
-      : false || false,
-      remainingLimit: resp?.data?.remaining_limit || 0,
-      charge: resp?.data?.charge || 0,
-      vat: resp?.data?.vat || 0,
-    };
-    savingsWithdrawal(data)
+  const chequeValidationAction = async () => {
+    if (cheque?.length < 0) {
+      return;
+    }
+    setLoadingCheque(true);
+    validateCheque(cheque, accountNumber)
       .then((res: any) => {
-        console.log("withdrawal response: ", res);
-        setLoading(false);
-        if (res?.sucesss === false) {
-          toast.error(DOMPurify.sanitize(res?.message || "An error occurred"), {
+        console.log(res, "CHEQUE");
+        if (
+          res.sucesss == "false" &&
+          res?.data?.data?.chequestatus != "DRAWN" &&
+          res?.data?.data?.chequestatus != "AVAILABLE"
+        ) {
+          toast.error(DOMPurify.sanitize(res?.message) || "An error occurred", {
             position: "top-right",
             autoClose: 5000,
             hideProgressBar: false,
@@ -326,15 +328,44 @@ export default function Withdrawal({
             theme: "light",
             transition: Bounce,
           });
-        } else {
-          setShowDetailModal(false);
-          setQueueNumber(res?.data!.queuenumber || "");
-          setShowSuccessModal(true);
+        } else if (res?.data?.data?.chequestatus === "DRAWN") {
+          toast.error("This cheque number has already been used", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          });
+        } else if (
+          res?.data?.description === "True" &&
+          res?.data?.data?.chequestatus === "AVAILABLE"
+        ) {
+          toast.success("Cheque number is valid", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          });
+          setChequeValidated(true);
+          setLoadingCheque(false);
         }
+        setLoadingCheque(false);
       })
-      .catch((e) => {
+      .catch((e: any) => {
+        setIsProcessing(false);
+        setLoadingCheque(false);
+        console.log(e?.response);
         toast.error(
-          DOMPurify.sanitize(e?.response?.data?.title || "An error occurred"),
+          DOMPurify.sanitize(e?.response?.data) || "An error occurred",
           {
             position: "top-right",
             autoClose: 5000,
@@ -347,11 +378,133 @@ export default function Withdrawal({
             transition: Bounce,
           }
         );
-        setLoading(false);
       });
   };
+
+  const onSubmitSavingsWithdrawal = async () => {
+    setLoading(true);
+    let data:any;
+    let res:any;
+    try{
+      if (accountType==AccountType.Savings) {
+        data = {
+          accountNumber,
+          transactionType: accountType === AccountType.Savings ? "Savings withdrawal" : userType,
+          currency: senderAccount?.currency_code.toString(),
+          accountType: accountType,
+          amount,
+          accountName: senderAccount?.acc_name,
+          nuban: accountNumber,
+          transactionId: generate(12),
+          accountStatus: "active",
+          isThirdparty: userType === CustomerType.ThirdParty ? true : false,
+    
+          narration: narration,
+          //mobileNumber:userType===CustomerType.Self? senderAccount.mobile: depositorPhone,
+          bvn: senderAccount?.bvn,
+          branchCode: currentUser.BRANCH_CODE,
+    
+          isWithinLimit: resp?.description == "Transaction within limit" ||
+            resp?.description.includes("Transaction within limit")
+            ? true
+            : false || false,
+          remainingLimit: resp?.data?.remaining_limit || 0,
+          charge: resp?.data?.charge || 0,
+          vat: resp?.data?.vat || 0,
+        };
+      }else{
+        data = {
+          accountNumber,
+          chequeNumber: cheque,
+          customerId: senderAccount?.cif_sub_no.toString(),
+          transactionType: accountType === AccountType.Savings ? "Savings withdrawal" : "Cheque withdrawal",
+          currency: senderAccount?.currency_code.toString(),
+          depositorName:senderAccount?.acc_name,
+          chequeType: chequeType,
+          ischequeValid: chequeValidated,
+          isCorporate:
+          accountSubType === "individual_current" ? false : true,
+  
+          accountType: accountType,
+          amount,
+          accountName: senderAccount?.acc_name,
+          nuban: accountNumber,
+          transactionId: generate(12),
+          accountStatus: "active",
+          isThirdparty: userType === CustomerType.ThirdParty ? true : false,
+    
+          narration: narration,
+          //mobileNumber:userType===CustomerType.Self? senderAccount.mobile: depositorPhone,
+          bvn: bvn,
+          branchCode: currentUser.BRANCH_CODE,
+    
+          isWithinLimit: resp?.description == "Transaction within limit" ||
+            resp?.description.includes("Transaction within limit")
+            ? true
+            : false || false,
+          remainingLimit: resp?.data?.remaining_limit || 0,
+          charge: resp?.data?.charge || 0,
+          vat: resp?.data?.vat || 0,
+        };
+        if (userType==CustomerType.ThirdParty) {
+          data.beneficiary=beneficiary;
+          data.phone=phone;
+          
+        }
+      }
+  
+      if (accountType==AccountType.Current) {
+        res= await chequeWithdrawal(data)
+      }else{
+  res= await savingsWithdrawal(data)
+      }
+
+      console.log("withdrawal response: ", res);
+      setLoading(false);
+      if (res?.sucesss === false) {
+        toast.error(DOMPurify.sanitize(res?.message || "An error occurred"), {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        });
+      } else {
+        setShowDetailModal(false);
+        setQueueNumber(res?.data!.queuenumber || "");
+        setShowSuccessModal(true);
+      }
+    }
+    catch(e:any) {
+      setLoading(false);
+      toast.error(
+        DOMPurify.sanitize(e?.response?.data?.title || "An error occurred"),
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        }
+      );
+      
+    }
+    
+    
+    
+    
+     
+  };
   const isProceedDisabled =
-    !accountNumber || !senderAccount || !amount || loading || isProcessing|| cfiloader;
+    !accountNumber || !senderAccount || !amount || loading || isProcessing || cfiloader || (chequeType==ChequeType.Cheque && !chequeValidated && accountType==AccountType.Current) || (userType==CustomerType.ThirdParty && !beneficiary && accountType==AccountType.Current);
 
 
   return (
@@ -406,6 +559,137 @@ export default function Withdrawal({
               FCY transactions are currently not available
             </p>
           ) : null}
+
+          {senderAccount && accountType == AccountType.Current && (
+            <div>
+              <div className="mb-6">
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Cheque Type
+                </Label>
+                <Select value={chequeType} onValueChange={setChequeType}>
+                  <SelectTrigger className="w-full !h-12.5 rounded-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cheque">Cheque</SelectItem>
+                    <SelectItem value="counter">Counter Cheque</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+
+
+            </div>
+
+          )}
+
+          {senderAccount && accountType == AccountType.Current && (
+            <div>
+              <div className="mb-6">
+                <AccountNumberInput
+                  type="number"
+                  name="chequeNumber"
+                  id="chequeNumber"
+                  value={cheque}
+                  handleChange={(e) => setCheque(e.target.value)}
+                  handleInput={(e) => {
+                    e.target.value = sanitizeInput(e.target.value);
+                  }}
+                  onBlur={() => chequeValidationAction()}
+                  labelText={chequeType == ChequeType.Cheque ? `Enter cheque number` : `Enter counter cheque number`}
+                  labelFor={""}
+                  //placeholder={"Please enter cheque number"}
+                  customClass={
+                    "bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
+                  }
+                />
+              </div>
+
+              {loadingCheque ? (
+                <InlineTextLoader></InlineTextLoader>
+              ) : chequeValidated ? (
+                <div
+                  className={`${chequeValidated ? "text-[#099F4E]" : "text-[#304DAF]"
+                    } text-bold ml-0 mb-6 mt-0 ms-5 cursor-pointer`}
+                >
+                  {"Cheque number Validated"}
+                </div>
+              ) : null}
+            </div>
+          )}
+          {
+            senderAccount && accountType == AccountType.Current && userType==CustomerType.ThirdParty && (
+              <div>
+              <div className="mb-6">
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Beneficiary Name
+                </Label>
+                <input
+                  type="text"
+                  name="depositor"
+                  id="depositor"
+                  value={beneficiary || ""}
+                  onChange={(e) => setBeneficiary(e.target.value)}
+                  placeholder="Please enter beneficiary name"
+                  className="bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
+                />
+              </div>
+  
+              {/*** add depositors phone */}
+  
+               <div className="mb-6">
+                
+                <div>
+                        <PhoneNumberInputs
+                          type="number"
+                          name="phone"
+                          id="phone"
+                          handleChange={(e) => setPhone(e.target.value)}
+                          handleInput={(e) => {
+                            e.target.value = e.target.value.replace(
+                              /[^0-9]/g,
+                              ""
+                            );
+                          }}
+                          value={phone}
+                          labelText={"Phone Number"}
+                          labelFor={"Phone Number"}
+                          placeholder={"080475784..."}
+                          customClass={
+                            "bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                          }
+                        ></PhoneNumberInputs>
+                      </div>
+              </div>
+
+              <div className="mb-6">
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Enter Bvn
+                </Label>
+                <BVNNumberInputs
+                          type="number"
+                          name="bvn"
+                          id="bvn"
+                          handleChange={(e) => setBVN(e.target.value)}
+                          value={bvn}
+                          labelText={""}
+                          handleInput={(e) => {
+                            e.target.value = e.target.value.replace(
+                              /[^0-9]/g,
+                              ""
+                            );
+                          }}
+                          labelFor={"bvn"}
+                          placeholder={"BVN"}
+                          customClass={
+                            "bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                          }
+                        ></BVNNumberInputs>
+              </div>
+              </div>
+
+            )
+          }
 
           {
             senderAccount && senderAccount?.currency === "NGN" && (
@@ -485,15 +769,16 @@ export default function Withdrawal({
 
           <div className="flex gap-3 mt-8">
             <Button
-            disabled={isProceedDisabled}
+              disabled={isProceedDisabled}
               onClick={handleProceed}
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium"
             >
               Proceed
             </Button>
             <Button
+            onClick={() => navigate("/home")}
               variant="outline"
-              disabled
+              
               className="flex-1 border-red-300 text-red-600 h-12 rounded-full font-medium bg-transparent"
             >
               Cancel
@@ -550,30 +835,38 @@ export default function Withdrawal({
               </div>
 
 
-              
 
-              {/* {benefiaryAccount && (
+
+              {beneficiary && (
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Beneficiary account number</span>
+                  <span className="text-gray-600">Beneficiary Name </span>
                   <span className="text-gray-400">
-                    {benefiaryAccountNumber}
+                    {beneficiary}
                   </span>
                 </div>
-              )} */}
+              )}
 
-              {/* {benefiaryAccount && (
+              {phone && (
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Beneficiary Name</span>
+                  <span className="text-gray-600">Beneficiary Phone Number</span>
                   <span className="text-gray-400">
-                    {benefiaryAccount?.acc_name}
+                    {phone}
                   </span>
                 </div>
-              )} */}
+              )}
+              {bvn && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Beneficiary Bvn</span>
+                  <span className="text-gray-400">
+                    {bvn}
+                  </span>
+                </div>
+              )}
             </div>
 
             {!loading ? (
               <Button
-                onClick={ onSubmitSavingsWithdrawal}
+                onClick={onSubmitSavingsWithdrawal}
                 disabled={loading}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-full font-medium"
               >
