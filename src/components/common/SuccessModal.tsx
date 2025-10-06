@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 interface SuccessModalProps {
+  title:string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   queueNumber: string;
 }
 
-export default function SuccessModal({ open, onOpenChange, queueNumber }: SuccessModalProps) {
+export default function SuccessModal({ open, onOpenChange, queueNumber ,title}: SuccessModalProps) {
   const navigate = useNavigate();
 
   const handleReturnToHomepage = () => {
@@ -26,7 +27,7 @@ export default function SuccessModal({ open, onOpenChange, queueNumber }: Succes
           </div>
 
           <h2 className="text-lg font-medium text-gray-700 mb-6 leading-relaxed">
-            Your deposit instruction has been submitted successfully
+           {title}
           </h2>
 
           <div className="text-6xl font-bold text-green-500 mb-6">{queueNumber}</div>
