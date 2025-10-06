@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import {
@@ -29,6 +29,7 @@ import CurrencyInput from "react-currency-input-field";
 import generate, { capitalizeFirstLetter } from "@/utils/randomGenerator";
 import SuccessModal from "@/components/common/SuccessModal";
 import ButtonLoaderTransactions from "@/components/common/buttonLoader";
+import { formatCurrency } from "@/utils/helper";
 
 interface DepositProps {
   userType: string;
@@ -49,9 +50,8 @@ export default function Deposit({
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [queueNumber, setQueueNumber] = useState("");
-  const [transactionType, setTransactionType] = useState("deposit");
   const [depositType, setDepositType] = useState("cash");
-  const { validate, glcodesList } = useTransaction();
+  const { validate } = useTransaction();
   const { deposit } = depositTransaction();
   const { chequeDeposit } = chequeDepositTransaction();
   const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
@@ -65,10 +65,10 @@ export default function Deposit({
   const [amount, setAmount] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<any>({});
   const [depositor, setDepositor] = useState<string | null>("");
+  const [depositorPhone, setDepositorPhone] = useState<string | null>("");
   const [benefiaryAccountNumber, setBenefiaryAccountNumber] = useState<any>();
   const [benefiaryAccount, setBenefiaryAccount] = useState<any>();
   const [accountType, setAccountType] = useState<string>("");
-  const [accountSubType, setAccountSubType] = useState<any>("");
 
   const [chequeValidated, setChequeValidated] = useState<boolean>(false);
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
@@ -170,7 +170,7 @@ export default function Deposit({
           }`
         );
       } else {
-        setDepositor(null);
+        // setDepositor(null);
         setNarration(
           `${capitalizeFirstLetter(depositType)} deposit by ${depositor}`
         );
@@ -181,30 +181,9 @@ export default function Deposit({
   };
 
   const isProceedDisabled =
-    !accountNumber || !senderAccount || !amount || loading || isProcessing||(accountType == AccountType.Current && depositType == DepositType.Cheque && !chequeValidated);
+    !accountNumber || !senderAccount || !amount || loading || isProcessing||(accountType == AccountType.Current && depositType == DepositType.Cheque && !chequeValidated)||(userType === CustomerType.ThirdParty && (!depositor || !depositorPhone)); ;
 
-  const formatCurrency = (value: number, currency: string) => {
-    if (!currency || currency === "No currency" || currency === "N/A") {
-      return new Intl.NumberFormat("en-US", {
-        style: "decimal",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(value || 0);
-    }
-    try {
-      return new Intl.NumberFormat("en-NG", {
-        style: "currency",
-        currency: currency,
-      }).format(value);
-    } catch (error) {
-      console.error("Error formatting currency:", error);
-      return new Intl.NumberFormat("en-US", {
-        style: "decimal",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(value);
-    }
-  };
+ 
 
   const validateAccount = useCallback(
     (accountNumber: string) => {
@@ -215,7 +194,6 @@ export default function Deposit({
 
       setLoading(true);
       setSenderAccount(null);
-      setAccountSubType("");
       setAccountType("");
       validate(accountNumber)
         .then((res: any) => {
@@ -243,7 +221,6 @@ export default function Deposit({
               setCurrency(res.data.currency);
               setSenderAccount(res.data.getaccounts);
               let glAccounType: string;
-              let accountCategory: string;
               const glcode = res.data.getaccounts.gl_code.toString();
               console.log("GL CODE ", glcode);
               console.log("savingsIndividualGLCodes ", savingsIndividualGLCodes);
@@ -255,18 +232,12 @@ export default function Deposit({
 
               if (savingsIndividualGLCodes?.includes(glcode)) {
                 glAccounType = "savings";
-                accountCategory = "savings";
-                setAccountSubType(accountCategory);
                 setAccountType(glAccounType);
               } else if (individualCurrentGLCodes.includes(glcode)) {
                 glAccounType = "current";
-                accountCategory = "individual_current";
-                setAccountSubType(accountCategory);
                 setAccountType(glAccounType);
               } else if (corporateGLCodes.includes(glcode)) {
                 glAccounType = "current";
-                accountCategory = "corporate";
-                setAccountSubType(accountCategory);
                 setAccountType(glAccounType);
               } else {
                 setSenderAccount(null);
@@ -284,8 +255,6 @@ export default function Deposit({
                 });
 
                 glAccounType = "disabled";
-                accountCategory = "disabled";
-                setAccountSubType(accountCategory);
               }
             } else {
               setIsProcessing(false);
@@ -415,14 +384,15 @@ export default function Deposit({
       transactionType: "deposit",
       currency: senderAccount?.currency,
       amount,
+     
       accountName: senderAccount?.acc_name,
       transactionId: generate(12),
       accountStatus: "active",
-
+      isThirdparty:userType === CustomerType.ThirdParty ? true : false,
       depositorType: userType,
       depositorName: depositor ? depositor : "Owner",
       narration: narration,
-      mobileNumber: senderAccount.mobile,
+      mobileNumber:userType===CustomerType.Self? senderAccount.mobile: depositorPhone,
       bvn: senderAccount?.customerBVN,
       branchNumber: currentUser.BRANCH_CODE,
     };
@@ -745,6 +715,42 @@ export default function Deposit({
             </div>
           )}
 
+          {(userType === CustomerType.ThirdParty && amount) && (
+            <div>
+            <div className="mb-6">
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                Depositor Name
+              </Label>
+              <input
+                type="text"
+                name="depositor"
+                id="depositor"
+                value={depositor || ""}
+                onChange={(e) => setDepositor(e.target.value)}
+                placeholder="Please enter depositor name"
+                className="bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
+              />
+            </div>
+
+            {/*** add depositors phone */}
+
+             <div className="mb-6">
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                Depositor Phone Number
+              </Label>
+              <input
+                type="text"
+                name="depositorPhone"
+                id="depositorPhone"
+                value={depositorPhone || ""}
+                onChange={(e) => setDepositorPhone(e.target.value)}
+                placeholder="Please enter depositor phone number"
+                className="bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
+              />
+            </div>
+            </div>
+          )}
+
           {(accountNumber && benefiaryAccountNumber && amount && chequeValidated) ? (
             <div className="mt-4 mb-4">
               <div className="text-bold" style={{ color: "#000000" }}>
@@ -860,6 +866,7 @@ export default function Deposit({
       </Dialog>
 
       <SuccessModal
+        title="Your deposit instruction has been submitted successfully"
         open={showSuccessModal}
         onOpenChange={setShowSuccessModal}
         queueNumber={queueNumber}

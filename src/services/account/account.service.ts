@@ -94,7 +94,7 @@ export class AccountService {
     withdraw = async (data: any) => {
       const tokenatedData: any = await generateKey(data)
       return this.instance
-        .post('api/Transactions/ProcessSavingsWithdrawal', { data: tokenatedData }, {
+        .post('api/CustomerInstruction/SavingsWithdrawal', { data: tokenatedData }, {
           
         })
         .then(res => {
@@ -116,7 +116,7 @@ export class AccountService {
     limitCBN = async (data: any) => {
       const tokenatedData: any = await generateKey(data)
       return this.instance
-        .post('api/ThirdPartyContorller/GetCifLimit', { data: tokenatedData }, {
+        .post('api/CustomerInstruction/GetCifLimit', { data: tokenatedData }, {
           
         })
         .then(res => {
@@ -141,7 +141,7 @@ export class AccountService {
     withdrawCheque = async (data: any) => {
       const tokenatedData: any = await generateKey(data)
       return this.instance
-        .post('api/Transactions/ProcessChequeWithdrawal', { data: tokenatedData }, {
+        .post('api/CustomerInstruction/ChequeWithdrawal', { data: tokenatedData }, {
           
         })
         .then(res => {

@@ -21,6 +21,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dompurify": "^3.2.6",
+    "iconsax-react": "^0.0.8",
     "jose": "^6.0.13",
     "lodash": "^4.17.21",
     "lucide-react": "^0.539.0",
