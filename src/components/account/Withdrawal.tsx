@@ -56,24 +56,9 @@ interface CbnLimitResponse {
   };
 }
 
-interface ChequeValidationResponse {
-  sucesss: string;
-  message?: string;
-  data?: {
-    description: string;
-    data?: {
-      chequestatus: string;
-    };
-  };
-}
 
-interface WithdrawalResponse {
-  sucesss: boolean;
-  message?: string;
-  data?: {
-    queuenumber: string;
-  };
-}
+
+
 
 interface SavingsWithdrawalData {
   accountNumber: string;
@@ -140,7 +125,7 @@ export default function Withdrawal({
   individualCurrentGLCodes,
   savingsIndividualGLCodes,
 }: WithdrawalProps) {
-  const [senderAccount, setSenderAccount] = useState<SenderAccount | null>(null);
+  const [senderAccount, setSenderAccount] = useState< any>(null);
   const [accountNumber, setAccountNumber] = useState<string>("");
   const [accountType, setAccountType] = useState<string>("");
   const [accountSubType, setAccountSubType] = useState<string>("");
@@ -198,7 +183,7 @@ export default function Withdrawal({
       setAccountType("");
       setAccountSubType("");
       validate(accountNumber)
-        .then((res: { description: string; data?: { getaccounts: SenderAccount } }) => {
+        .then((res:any) => {
           setIsProcessing(false);
           const responseMessage = res?.description;
           console.log({ res });
@@ -282,7 +267,7 @@ export default function Withdrawal({
           }
           setLoading(false);
         })
-        .catch((e: { response?: { data: string } }) => {
+        .catch((e: any) => {
           setCurrency("N/A");
           setSenderAccount(null);
           setLoading(false);
@@ -335,7 +320,7 @@ export default function Withdrawal({
         setCFILoader(false);
       } else {
         getCBNLimit(senderAccount.cif_sub_no.toString())
-          .then((res: CbnLimitResponse) => {
+          .then((res: any) => {
             console.log(res, "Response MSG");
             setResp(res);
             localStorage.setItem("CFI", JSON.stringify(res));
@@ -350,7 +335,7 @@ export default function Withdrawal({
             //   setExcessAmount(totalAmount - Number(res.data?.data?.LIMIT));
             // }
           })
-          .catch((error: { response?: { data: string } }) => {
+          .catch((error: any) => {
             console.log(error, "ERROR MESSAGE");
             toast.error(
               DOMPurify.sanitize(error?.response?.data) || "An Error Occured",
@@ -401,7 +386,7 @@ export default function Withdrawal({
     }
     setLoadingCheque(true);
     validateCheque(cheque, accountNumber)
-      .then((res: ChequeValidationResponse) => {
+      .then((res: any) => {
         console.log(res, "CHEQUE");
         if (
           res.sucesss == "false" &&
@@ -451,7 +436,7 @@ export default function Withdrawal({
         }
         setLoadingCheque(false);
       })
-      .catch((e: { response?: { data: string } }) => {
+      .catch((e: any) => {
         setIsProcessing(false);
         setLoadingCheque(false);
         console.log(e?.response);
@@ -475,7 +460,7 @@ export default function Withdrawal({
   const onSubmitSavingsWithdrawal = async () => {
     if (!senderAccount || !currentUser) return;
     setLoading(true);
-    let res: WithdrawalResponse;
+    let res: any;
     try {
       if (accountType === AccountType.Savings) {
         const data: SavingsWithdrawalData = {
