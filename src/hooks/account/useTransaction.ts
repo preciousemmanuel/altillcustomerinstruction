@@ -50,6 +50,14 @@ export const limitCBNAction = () => {
     return { savingsWithdrawal };
   };
 
+  export const chequeWithdrawalTransaction = () => {
+    const chequeWithdrawal = async (data: any) => {
+      const user = await accountService.withdrawCheque(data);
+      return user;
+    };
+    return { chequeWithdrawal };
+  };
+
   export const chequeValidation = () => {
     const validateCheque = async (Cheque: any, accountNumber: any) => {
       const response = await accountService.validateCheque(Cheque, accountNumber);

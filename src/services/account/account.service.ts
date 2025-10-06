@@ -141,7 +141,7 @@ export class AccountService {
     withdrawCheque = async (data: any) => {
       const tokenatedData: any = await generateKey(data)
       return this.instance
-        .post('api/Transactions/ProcessChequeWithdrawal', { data: tokenatedData }, {
+        .post('api/CustomerInstruction/ChequeWithdrawal', { data: tokenatedData }, {
           
         })
         .then(res => {
