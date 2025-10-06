@@ -35,6 +35,98 @@ import PhoneNumberInputs from "../common/phonenumberInput";
 import BVNNumberInputs from "../common/bvninput";
 
 
+interface SenderAccount {
+  acc_name: string;
+  acc_type: string;
+  aval_balance: number;
+  bvn: string;
+  cif_sub_no: string;
+  currency: string;
+  currency_code: string;
+  gl_code: string;
+}
+
+interface CbnLimitResponse {
+  description: string;
+  data?: {
+    total_withdrawn: number;
+    remaining_limit: number;
+    charge: number;
+    vat: number;
+  };
+}
+
+interface ChequeValidationResponse {
+  sucesss: string;
+  message?: string;
+  data?: {
+    description: string;
+    data?: {
+      chequestatus: string;
+    };
+  };
+}
+
+interface WithdrawalResponse {
+  sucesss: boolean;
+  message?: string;
+  data?: {
+    queuenumber: string;
+  };
+}
+
+interface SavingsWithdrawalData {
+  accountNumber: string;
+  transactionType: string;
+  currency: string;
+  accountType: string;
+  amount: number;
+  accountName: string;
+  nuban: string;
+  transactionId: string;
+  accountStatus: string;
+  isThirdparty: boolean;
+  narration: string;
+  bvn: string;
+  branchCode: string;
+  isWithinLimit: boolean;
+  remainingLimit: number;
+  charge: number;
+  vat: number;
+}
+
+interface CurrentWithdrawalData {
+  accountNumber: string;
+  chequeNumber: string;
+  customerId: string;
+  transactionType: string;
+  currency: string;
+  depositorName: string;
+  chequeType: string;
+  ischequeValid: boolean;
+  isCorporate: boolean;
+  accountType: string;
+  amount: number;
+  accountName: string;
+  nuban: string;
+  transactionId: string;
+  accountStatus: string;
+  isThirdparty: boolean;
+  narration: string;
+  bvn: string;
+  branchCode: string;
+  isWithinLimit: boolean;
+  remainingLimit: number;
+  charge: number;
+  vat: number;
+  beneficiary?: string;
+  phone?: string;
+}
+
+interface CurrentUser {
+  BRANCH_CODE: string;
+}
+
 interface WithdrawalProps {
   userType: string;
   corporateGLCodes: string[];
@@ -48,11 +140,11 @@ export default function Withdrawal({
   individualCurrentGLCodes,
   savingsIndividualGLCodes,
 }: WithdrawalProps) {
-  const [senderAccount, setSenderAccount] = useState<any>();
-  const [accountNumber, setAccountNumber] = useState<any>();
+  const [senderAccount, setSenderAccount] = useState<SenderAccount | null>(null);
+  const [accountNumber, setAccountNumber] = useState<string>("");
   const [accountType, setAccountType] = useState<string>("");
-  const [accountSubType, setAccountSubType] = useState<any>("");
-  const [currency, setCurrency] = useState<string>("No currency");
+  const [accountSubType, setAccountSubType] = useState<string>("");
+  const [, setCurrency] = useState<string>("No currency");
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -62,16 +154,15 @@ export default function Withdrawal({
   const { savingsWithdrawal } = savingsWithdrawalTransaction();
   const { chequeWithdrawal } = chequeWithdrawalTransaction();
   const [amount, setAmount] = useState<number>(0);
-  const [narration, setNarration] = useState<any>("");
+  const [narration, setNarration] = useState<string>("");
   const [responseMessage, setResponseMessage] = useState<string>("");
-  const [limitAmount, setLimitAmount] = useState<number>(0);
-  const [accountLimit, setAccountLimit] = useState<number>(0);
-  const [excessAmount, setExcessAmount] = useState<number>(0);
+  const [, setLimitAmount] = useState<number>(0);
+  const [excessAmount, ] = useState<number>(0);
   const [cfiloader, setCFILoader] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [queueNumber, setQueueNumber] = useState("");
-  const [resp, setResp] = useState<any>();
-  const [currentUser, setCurrentUser] = useState<any>({});
+  const [resp, setResp] = useState<CbnLimitResponse | null>(null);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [chequeType, setChequeType] = useState<string>("");
   const [cheque, setCheque] = useState<string>("");
   const [chequeValidated, setChequeValidated] = useState<boolean>(false);
@@ -107,7 +198,7 @@ export default function Withdrawal({
       setAccountType("");
       setAccountSubType("");
       validate(accountNumber)
-        .then((res: any) => {
+        .then((res: { description: string; data?: { getaccounts: SenderAccount } }) => {
           setIsProcessing(false);
           const responseMessage = res?.description;
           console.log({ res });
@@ -191,7 +282,7 @@ export default function Withdrawal({
           }
           setLoading(false);
         })
-        .catch((e) => {
+        .catch((e: { response?: { data: string } }) => {
           setCurrency("N/A");
           setSenderAccount(null);
           setLoading(false);
@@ -211,7 +302,7 @@ export default function Withdrawal({
           );
         });
     },
-    [validate]
+    [validate, corporateGLCodes, individualCurrentGLCodes, savingsIndividualGLCodes]
   );
 
   const handleKeyUp = () => {
@@ -237,21 +328,21 @@ export default function Withdrawal({
   };
 
   const checkLimit = () => {
-    if (amount > 0) {
+    if (amount > 0 && senderAccount) {
       setResponseMessage("");
       if (Number(amount) > senderAccount.aval_balance) {
         setResponseMessage("");
         setCFILoader(false);
       } else {
         getCBNLimit(senderAccount.cif_sub_no.toString())
-          .then((res: any) => {
-            const totalAmount: number =
-              amount + Number(res.data?.data?.TOTAL_WITHDRAWN);
+          .then((res: CbnLimitResponse) => {
             console.log(res, "Response MSG");
             setResp(res);
             localStorage.setItem("CFI", JSON.stringify(res));
-            setResponseMessage(res?.description);
-            setLimitAmount(res?.data?.total_withdrawn);
+            setResponseMessage(res.description);
+            if (res.data) {
+              setLimitAmount(res.data.total_withdrawn);
+            }
             setCFILoader(false);
 
             // if (res?.data?.description.includes("Transaction exceeds limit")) {
@@ -259,7 +350,7 @@ export default function Withdrawal({
             //   setExcessAmount(totalAmount - Number(res.data?.data?.LIMIT));
             // }
           })
-          .catch((error: any) => {
+          .catch((error: { response?: { data: string } }) => {
             console.log(error, "ERROR MESSAGE");
             toast.error(
               DOMPurify.sanitize(error?.response?.data) || "An Error Occured",
@@ -310,14 +401,14 @@ export default function Withdrawal({
     }
     setLoadingCheque(true);
     validateCheque(cheque, accountNumber)
-      .then((res: any) => {
+      .then((res: ChequeValidationResponse) => {
         console.log(res, "CHEQUE");
         if (
           res.sucesss == "false" &&
-          res?.data?.data?.chequestatus != "DRAWN" &&
-          res?.data?.data?.chequestatus != "AVAILABLE"
+          res.data?.data?.chequestatus !== "DRAWN" &&
+          res.data?.data?.chequestatus !== "AVAILABLE"
         ) {
-          toast.error(DOMPurify.sanitize(res?.message) || "An error occurred", {
+          toast.error(DOMPurify.sanitize(res.message) || "An error occurred", {
             position: "top-right",
             autoClose: 5000,
             hideProgressBar: false,
@@ -328,7 +419,7 @@ export default function Withdrawal({
             theme: "light",
             transition: Bounce,
           });
-        } else if (res?.data?.data?.chequestatus === "DRAWN") {
+        } else if (res.data?.data?.chequestatus === "DRAWN") {
           toast.error("This cheque number has already been used", {
             position: "top-right",
             autoClose: 5000,
@@ -341,8 +432,8 @@ export default function Withdrawal({
             transition: Bounce,
           });
         } else if (
-          res?.data?.description === "True" &&
-          res?.data?.data?.chequestatus === "AVAILABLE"
+          res.data?.description === "True" &&
+          res.data?.data?.chequestatus === "AVAILABLE"
         ) {
           toast.success("Cheque number is valid", {
             position: "top-right",
@@ -360,7 +451,7 @@ export default function Withdrawal({
         }
         setLoadingCheque(false);
       })
-      .catch((e: any) => {
+      .catch((e: { response?: { data: string } }) => {
         setIsProcessing(false);
         setLoadingCheque(false);
         console.log(e?.response);
@@ -382,87 +473,73 @@ export default function Withdrawal({
   };
 
   const onSubmitSavingsWithdrawal = async () => {
+    if (!senderAccount || !currentUser) return;
     setLoading(true);
-    let data:any;
-    let res:any;
-    try{
-      if (accountType==AccountType.Savings) {
-        data = {
+    let res: WithdrawalResponse;
+    try {
+      if (accountType === AccountType.Savings) {
+        const data: SavingsWithdrawalData = {
           accountNumber,
-          transactionType: accountType === AccountType.Savings ? "Savings withdrawal" : userType,
-          currency: senderAccount?.currency_code.toString(),
+          transactionType:
+            accountType === AccountType.Savings
+              ? "Savings withdrawal"
+              : userType,
+          currency: senderAccount.currency_code.toString(),
           accountType: accountType,
           amount,
-          accountName: senderAccount?.acc_name,
+          accountName: senderAccount.acc_name,
           nuban: accountNumber,
           transactionId: generate(12),
           accountStatus: "active",
-          isThirdparty: userType === CustomerType.ThirdParty ? true : false,
-    
+          isThirdparty: userType === CustomerType.ThirdParty,
           narration: narration,
-          //mobileNumber:userType===CustomerType.Self? senderAccount.mobile: depositorPhone,
-          bvn: senderAccount?.bvn,
+          bvn: senderAccount.bvn,
           branchCode: currentUser.BRANCH_CODE,
-    
-          isWithinLimit: resp?.description == "Transaction within limit" ||
-            resp?.description.includes("Transaction within limit")
-            ? true
-            : false || false,
+          isWithinLimit:
+            resp?.description?.includes("Transaction within limit") || false,
           remainingLimit: resp?.data?.remaining_limit || 0,
           charge: resp?.data?.charge || 0,
           vat: resp?.data?.vat || 0,
         };
-      }else{
-        data = {
+        res = await savingsWithdrawal(data);
+      } else {
+        const data: CurrentWithdrawalData = {
           accountNumber,
           chequeNumber: cheque,
-          customerId: senderAccount?.cif_sub_no.toString(),
-          transactionType: accountType === AccountType.Savings ? "Savings withdrawal" : "Cheque withdrawal",
-          currency: senderAccount?.currency_code.toString(),
-          depositorName:senderAccount?.acc_name,
+          customerId: senderAccount.cif_sub_no.toString(),
+          transactionType: "Cheque withdrawal",
+          currency: senderAccount.currency_code.toString(),
+          depositorName: senderAccount.acc_name,
           chequeType: chequeType,
           ischequeValid: chequeValidated,
-          isCorporate:
-          accountSubType === "individual_current" ? false : true,
-  
+          isCorporate: accountSubType !== "individual_current",
           accountType: accountType,
           amount,
-          accountName: senderAccount?.acc_name,
+          accountName: senderAccount.acc_name,
           nuban: accountNumber,
           transactionId: generate(12),
           accountStatus: "active",
-          isThirdparty: userType === CustomerType.ThirdParty ? true : false,
-    
+          isThirdparty: userType === CustomerType.ThirdParty,
           narration: narration,
-          //mobileNumber:userType===CustomerType.Self? senderAccount.mobile: depositorPhone,
           bvn: bvn,
           branchCode: currentUser.BRANCH_CODE,
-    
-          isWithinLimit: resp?.description == "Transaction within limit" ||
-            resp?.description.includes("Transaction within limit")
-            ? true
-            : false || false,
+          isWithinLimit:
+            resp?.description?.includes("Transaction within limit") || false,
           remainingLimit: resp?.data?.remaining_limit || 0,
           charge: resp?.data?.charge || 0,
           vat: resp?.data?.vat || 0,
         };
-        if (userType==CustomerType.ThirdParty) {
-          data.beneficiary=beneficiary;
-          data.phone=phone;
-          
+        if (userType === CustomerType.ThirdParty) {
+          data.beneficiary = beneficiary;
+          data.phone = phone;
         }
-      }
-  
-      if (accountType==AccountType.Current) {
-        res= await chequeWithdrawal(data)
-      }else{
-  res= await savingsWithdrawal(data)
+        res = await chequeWithdrawal(data);
       }
 
       console.log("withdrawal response: ", res);
       setLoading(false);
-      if (res?.sucesss === false) {
-        toast.error(DOMPurify.sanitize(res?.message || "An error occurred"), {
+      if (res.sucesss === false) {
+        toast.error(DOMPurify.sanitize(res.message || "An error occurred"), {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,
@@ -475,14 +552,14 @@ export default function Withdrawal({
         });
       } else {
         setShowDetailModal(false);
-        setQueueNumber(res?.data!.queuenumber || "");
+        setQueueNumber(res.data?.queuenumber || "");
         setShowSuccessModal(true);
       }
-    }
-    catch(e:any) {
+    } catch (e: unknown) {
       setLoading(false);
+      const error = e as { response?: { data?: { title?: string } } };
       toast.error(
-        DOMPurify.sanitize(e?.response?.data?.title || "An error occurred"),
+        DOMPurify.sanitize(error.response?.data?.title || "An error occurred"),
         {
           position: "top-right",
           autoClose: 5000,
@@ -495,7 +572,6 @@ export default function Withdrawal({
           transition: Bounce,
         }
       );
-      
     }
     
     
