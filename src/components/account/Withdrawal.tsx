@@ -145,7 +145,7 @@ export default function Withdrawal({
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
   const [beneficiary, setBeneficiary] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
-  const [bvn, setBVN] = useState<string>("ß");
+  const [bvn, setBVN] = useState<string>("");
   const navigate = useNavigate();
 
 
@@ -497,7 +497,7 @@ export default function Withdrawal({
           accountStatus: "active",
           isThirdparty: userType === CustomerType.ThirdParty,
           narration: narration,
-          bvn: bvn,
+          bvn: bvn==""? senderAccount.bvn : bvn,
           branchCode: currentUser.BRANCH_CODE,
           isWithinLimit:
             resp?.description?.includes("Transaction within limit") || false,
