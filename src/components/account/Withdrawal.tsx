@@ -297,7 +297,7 @@ export default function Withdrawal({
       withdrawalAmount: amount,
       balance: senderAccount.aval_balance,
       isCooporate: accountSubType === "corporate" ? true : false,
-      isThirdparty: userType === CustomerType.ThirdParty ? true : false,
+      isThirdparty: userType === CustomerType.ThirdParty,
       isCurrent: accountSubType === "individual_current" ? true : false,
       ledgerName: senderAccount.acc_type,
     });
@@ -572,7 +572,10 @@ export default function Withdrawal({
               value={accountNumber}
               handleChange={(e) => setAccountNumber(e.target.value)}
               handleInput={(e) => {
-                e.target.value = sanitizeInput(e.target.value);
+                e.target.value = sanitizeInput(e.target.value.replace(
+                  /[^0-9]/g,
+                  ""
+                ));
               }}
               onBlur={() => validateAccount(accountNumber)}
               labelText={"Account Number"}

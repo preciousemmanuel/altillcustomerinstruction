@@ -450,6 +450,8 @@ export default function Deposit({
       chequeType: "",
       currency: senderAccount?.currency,
       amount,
+      isThirdparty: userType === CustomerType.ThirdParty,
+
 
       transactionId: generate(12),
 
@@ -525,7 +527,11 @@ export default function Deposit({
               value={accountNumber}
               handleChange={(e) => setAccountNumber(e.target.value)}
               handleInput={(e) => {
-                e.target.value = sanitizeInput(e.target.value);
+                e.target.value = sanitizeInput(e.target.value.replace(
+                  /[^0-9]/g,
+                  ""
+                ));
+                // e.target.value = sanitizeInput(e.target.value);
               }}
               onBlur={() => validateAccount(accountNumber)}
               labelText={"Account Number"}
@@ -585,7 +591,10 @@ export default function Deposit({
                 value={cheque}
                 handleChange={(e) => setCheque(e.target.value)}
                 handleInput={(e) => {
-                  e.target.value = sanitizeInput(e.target.value);
+                  e.target.value = sanitizeInput(e.target.value.replace(
+                    /[^0-9]/g,
+                    ""
+                  ));
                 }}
                 onBlur={() => chequeValidationAction()}
                 labelText={"Cheque Number"}
