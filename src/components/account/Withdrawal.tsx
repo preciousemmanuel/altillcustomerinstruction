@@ -297,7 +297,7 @@ export default function Withdrawal({
       withdrawalAmount: amount,
       balance: senderAccount.aval_balance,
       isCooporate: accountSubType === "corporate" ? true : false,
-      isThirdparty: userType === CustomerType.ThirdParty ? true : false,
+      isThirdparty: userType === CustomerType.ThirdParty,
       isCurrent: accountSubType === "individual_current" ? true : false,
       ledgerName: senderAccount.acc_type,
     });

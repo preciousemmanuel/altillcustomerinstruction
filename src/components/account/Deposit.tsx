@@ -450,6 +450,8 @@ export default function Deposit({
       chequeType: "",
       currency: senderAccount?.currency,
       amount,
+      isThirdparty: userType === CustomerType.ThirdParty,
+
 
       transactionId: generate(12),
 
