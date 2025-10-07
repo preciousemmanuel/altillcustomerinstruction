@@ -2,7 +2,7 @@ import { CheckCircle } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import * as React from "react";
+
 
 interface SuccessModalProps {
   title: string;
