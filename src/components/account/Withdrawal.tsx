@@ -572,7 +572,10 @@ export default function Withdrawal({
               value={accountNumber}
               handleChange={(e) => setAccountNumber(e.target.value)}
               handleInput={(e) => {
-                e.target.value = sanitizeInput(e.target.value);
+                e.target.value = sanitizeInput(e.target.value.replace(
+                  /[^0-9]/g,
+                  ""
+                ));
               }}
               onBlur={() => validateAccount(accountNumber)}
               labelText={"Account Number"}
