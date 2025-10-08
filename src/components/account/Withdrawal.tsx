@@ -514,7 +514,7 @@ export default function Withdrawal({
 
       console.log("withdrawal response: ", res);
       setLoading(false);
-      if (res.sucesss === false) {
+      if (res?.sucesss === false || res.success==="false") {
         toast.error(DOMPurify.sanitize(res.message || "An error occurred"), {
           position: "top-right",
           autoClose: 5000,

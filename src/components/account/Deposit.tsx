@@ -174,14 +174,38 @@ export default function Deposit({
         setNarration(
           `${capitalizeFirstLetter(depositType)} deposit by ${depositor}`
         );
+       
       }
 
+    }else{
+      if ( accountNumber == benefiaryAccountNumber) {
+        toast.error("Beneficiary account number cannot be the same as sender account number", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        });
+        return;
+        
+      }
     }
     setShowDetailModal(true);
   };
 
   const isProceedDisabled =
-    !accountNumber || !senderAccount || !amount || loading || isProcessing||(accountType == AccountType.Current && depositType == DepositType.Cheque && !chequeValidated)||(userType === CustomerType.ThirdParty && (!depositor || !depositorPhone)); ;
+    !accountNumber || !senderAccount || !amount || loading || isProcessing
+    ||(accountType == AccountType.Current && depositType == DepositType.Cheque && !chequeValidated)||
+    (userType === CustomerType.ThirdParty && (!depositor || !depositorPhone))
+    ||(accountType == AccountType.Current && depositType == DepositType.Cheque && !currency)
+
+    ||(accountType == AccountType.Current && depositType == DepositType.Cheque && !benefiaryAccount)
+    ||(accountType == AccountType.Current && depositType == DepositType.Cheque && !narration)
+    ; 
 
  
 
@@ -400,7 +424,7 @@ export default function Deposit({
       .then((res: any) => {
         console.log("Deposit response: ", res);
         setLoading(false);
-        if (res?.sucesss === false) {
+        if (res?.sucesss === false || res.success==="false") {
           toast.error(DOMPurify.sanitize(res?.message || "An error occurred"), {
             position: "top-right",
             autoClose: 5000,
@@ -464,7 +488,7 @@ export default function Deposit({
       .then((res: any) => {
         console.log("Deposit response: ", res);
         setLoading(false);
-        if (res?.sucesss === false) {
+        if (res?.sucesss === false || res.success=="false") {
           toast.error(DOMPurify.sanitize(res?.message || "An error occurred"), {
             position: "top-right",
             autoClose: 5000,
