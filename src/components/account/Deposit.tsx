@@ -474,6 +474,8 @@ export default function Deposit({
       chequeType: "",
       currency: senderAccount?.currency,
       amount,
+      accountStatus: "active",
+      
       isThirdparty: userType === CustomerType.ThirdParty,
 
 
