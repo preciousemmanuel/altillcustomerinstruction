@@ -46,9 +46,12 @@ export default function TransferPage() {
               <span className="font-medium">Back</span>
             </button>
 
-            <h1 className="text-xl font-semibold mb-8 text-gray-900">
+            <h1 className="text-xl font-semibold mb-3 text-gray-900">
               Fund Transfer
             </h1>
+            <p className="text-sm mb-4 text-gray-600">
+            Enter transaction details
+            </p>
 
             <Withdrawal
               userType={userType}

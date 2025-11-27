@@ -20,7 +20,7 @@ function Landing() {
           <h1 className="text-3xl font-bold text-gray-900 mb-3">
             Customer Instruction Portal
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 text-sm">
             Submit your transaction instructions quickly and securely, to be
             treated by a teller.
           </p>
@@ -50,7 +50,7 @@ function Landing() {
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-bold text-gray-900">Customer</h3>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 text-sm mt-1">
                 Submit transaction instructions for your account
               </p>
             </div>
@@ -78,7 +78,7 @@ function Landing() {
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-bold text-gray-900">Third Party</h3>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 text-sm mt-1">
                 Submit transaction instructions on behalf of a customer
               </p>
             </div>

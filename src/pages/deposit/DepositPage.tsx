@@ -46,10 +46,12 @@ export default function DepositPage() {
               <span className="font-medium">Back</span>
             </button>
 
-            <h1 className="text-xl font-semibold mb-8 text-gray-900">
+            <h1 className="text-xl font-semibold mb-3 text-gray-900">
               Deposit
             </h1>
-
+            <p className="text-sm mb-4 text-gray-600">
+            Enter transaction details
+            </p>
             <Deposit
               userType={userType}
               corporateGLCodes={corporateGLCodes}
