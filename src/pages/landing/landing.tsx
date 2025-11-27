@@ -1,99 +1,102 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomerType } from "@/utils/base.enum";
 import { User, UserPlus } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function CustomerSelectCard({
-  title,
-  icon,
-  iconBgColor,
-  text,
-  onClick,
-  selected,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  iconBgColor: string;
-  buttonText: string;
-  text: string;
-  onClick: () => void;
-  selected: boolean;
-}) {
-  return (
-    <Card
-      className={`w-full text-left ${
-        selected ? "border-blue-600 border-2" : "border-neutral-200"
-      }  rounded-4xl shadow-none`}
-      onClick={onClick}
-    >
-      <CardHeader>
-        <div className={`${iconBgColor} rounded-full w-12 h-12`}>{icon}</div>
-        <CardTitle className="text-3xl font-bold max-w-[80%] pb-2 pt-8">
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>{text}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
 function Landing() {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleSelect = useCallback(
-    (type: string) => {
-      return setSelectedOption(selectedOption === type ? "" : type);
-    },
-    [selectedOption]
-  );
-
   const handleProceed = () => {
-    // if (selectedOption === CustomerType.Self) {
-      navigate("/account-form", { state: {userType: selectedOption } });
-  //  }
+    if (!selected) return;
+    navigate("/transaction-type", { state: { userType: selected } });
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="bg-white w-full md:w-[80%] p-6 rounded-xl text-center min-h-[50vh] flex flex-col justify-center">
-        <p className="text-2xl font-bold py-2">Customer Instruction Portal</p>
-        <p className="text-base text-[#9CA3AF] pb-12">
-          Submit your transaction instructions quickly and securely,
-          <br /> to be treated by a teller.
-        </p>
-        <div className="flex flex-col md:flex-row gap-6 w-full">
-          <CustomerSelectCard
-            buttonText="Continue as Customer"
-            title="Customer"
-            iconBgColor="bg-[#D0E2FB]"
-            icon={<User className={`text-[#0066FF] w-6 h-6 m-3`} />}
-            text="Submit transaction instructions for your account"
-            selected={selectedOption === CustomerType.Self}
-            onClick={() => handleSelect(CustomerType.Self)}
-          />
-          <CustomerSelectCard
-            buttonText="Continue as Guest"
-            title="Third Party"
-            iconBgColor="bg-[#FFF1FF]"
-            icon={<UserPlus className={`text-[#8F33A8] w-6 h-6 m-3`} />}
-            text="Submit transaction instructions on behalf of a customer"
-            onClick={() => handleSelect(CustomerType.ThirdParty)}
-            selected={selectedOption === CustomerType.ThirdParty}
-          />
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-lg">
+        {/* Header Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">
+            Customer Instruction Portal
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Submit your transaction instructions quickly and securely, to be
+            treated by a teller.
+          </p>
         </div>
 
-        <Button
-          className="rounded-full y-[22px] mt-4 p-8 bg-[#304DAF] text-white w-full md:w-[50%] my-12 self-center"
-          disabled={!selectedOption}
+        {/* Options Container */}
+        <div className="space-y-4 mb-8">
+          {/* Customer Option */}
+          <button
+            onClick={() => setSelected(CustomerType.Self)}
+            className={`w-full p-6 rounded-xl border-2 transition-all text-left flex items-start gap-4 ${
+              selected === CustomerType.Self
+                ? "border-gray-300 bg-gray-50"
+                : "border-gray-200 bg-white hover:bg-gray-50"
+            }`}
+          >
+            <div className="flex-shrink-0 mt-1">
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  selected === CustomerType.Self
+                    ? "bg-blue-100 text-blue-500"
+                    : "bg-gray-100 text-gray-400"
+                }`}
+              >
+                <User className="w-6 h-6" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-gray-900">Customer</h3>
+              <p className="text-gray-600 mt-1">
+                Submit transaction instructions for your account
+              </p>
+            </div>
+          </button>
+
+          {/* Third Party Option */}
+          <button
+            onClick={() => setSelected(CustomerType.ThirdParty)}
+            className={`w-full p-6 rounded-xl border-2 transition-all text-left flex items-start gap-4 ${
+              selected === CustomerType.ThirdParty
+                ? "border-blue-600 bg-blue-50"
+                : "border-gray-200 bg-white hover:bg-gray-50"
+            }`}
+          >
+            <div className="flex-shrink-0 mt-1">
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  selected === CustomerType.ThirdParty
+                    ? "bg-blue-200 text-blue-600"
+                    : "bg-gray-100 text-gray-400"
+                }`}
+              >
+                <UserPlus className="w-6 h-6" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-gray-900">Third Party</h3>
+              <p className="text-gray-600 mt-1">
+                Submit transaction instructions on behalf of a customer
+              </p>
+            </div>
+          </button>
+        </div>
+
+        {/* Proceed Button */}
+        <button
           onClick={handleProceed}
+          disabled={!selected}
+          className={`w-full font-semibold py-3 px-6 rounded-xl transition-colors ${
+            !selected
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
+          }`}
         >
           Proceed
-        </Button>
+        </button>
       </div>
     </div>
   );
