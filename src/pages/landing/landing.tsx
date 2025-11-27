@@ -9,7 +9,7 @@ function Landing() {
 
   const handleProceed = () => {
     if (!selected) return;
-    navigate("/account-form", { state: { userType: selected } });
+    navigate("/transaction-type", { state: { userType: selected } });
   };
 
   return (
