@@ -22,7 +22,7 @@ import {
   chequeValidation
 } from "../../hooks/account/useTransaction";
 import { sanitizeInput } from "@/utils/sanitizer";
-import { AccountType, ChequeType, Currencies, CustomerType } from "@/utils/base.enum";
+import { AccountType, ChequeType, CustomerType } from "@/utils/base.enum";
 import CurrencyInput from "react-currency-input-field";
 import InlineTextLoader from "../common/inlineTextLoader";
 import { formatCurrency } from "@/utils/helper";
