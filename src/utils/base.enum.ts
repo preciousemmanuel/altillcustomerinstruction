@@ -19,3 +19,11 @@ export const ChequeType = {
     Cheque: "cheque",
     Counter: "counter",
 } as const;
+
+
+export const Currencies = [
+    { value: "NGN", label: "NGN" },
+    { value: "USD", label: "USD" },
+    { value: "EUR", label: "Euro" },
+    { value: "GBP", label: "Pounds" },
+  ];

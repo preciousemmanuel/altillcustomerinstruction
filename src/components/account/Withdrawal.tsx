@@ -33,6 +33,7 @@ import SuccessModal from "../common/SuccessModal";
 
 import PhoneNumberInputs from "../common/phonenumberInput";
 import BVNNumberInputs from "../common/bvninput";
+import AccountCard from "../accountName";
 
 
 
@@ -469,7 +470,8 @@ export default function Withdrawal({
           accountStatus: "active",
           isThirdparty: userType === CustomerType.ThirdParty,
           narration: narration,
-          bvn: senderAccount.bvn,
+          bvn: "N/A",
+          //bvn: senderAccount.bvn,
           branchCode: currentUser.BRANCH_CODE,
           isWithinLimit:
             resp?.description?.includes("Transaction within limit") || false,
@@ -497,7 +499,8 @@ export default function Withdrawal({
           accountStatus: "active",
           isThirdparty: userType === CustomerType.ThirdParty,
           narration: narration,
-          bvn: bvn==""? senderAccount.bvn : bvn,
+          bvn: "N/A",
+         // bvn: bvn==""? senderAccount.bvn : bvn,
           branchCode: currentUser.BRANCH_CODE,
           isWithinLimit:
             resp?.description?.includes("Transaction within limit") || false,
@@ -589,31 +592,16 @@ export default function Withdrawal({
 
           {loading ? (
             <InlineTextLoader></InlineTextLoader>
-          ) : senderAccount && senderAccount.currency == "NGN" ? (
-            <div className="mb-6">
-              <div className="bg-blue-200 text-gray-700 rounded-md px-4 py-3 space-y-1">
-                <div>
-                  <span className="font-bold">Account Name:</span>{" "}
-                  <span className="text-gray-500">
-                    {" "}
-                    {senderAccount?.acc_name || "N/A"}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-bold">Account Type:</span>{" "}
-                  <span className="text-gray-500">
-                    {senderAccount?.acc_type || "N/A"}
-                  </span>
-                </div>
-              </div>
-            </div>
+          ) : senderAccount  ? (
+            <AccountCard account={senderAccount} userType={userType} />
+           
           ) : null}
 
-          {(senderAccount && senderAccount?.currency !== "NGN") ? (
+          {/* {(senderAccount && senderAccount?.currency !== "NGN") ? (
             <p className="mt-8 text-red-500 text-start">
               FCY transactions are currently not available
             </p>
-          ) : null}
+          ) : null} */}
 
           {senderAccount && accountType == AccountType.Current && (
             <div>
@@ -717,7 +705,7 @@ export default function Withdrawal({
                       </div>
               </div>
 
-              <div className="mb-6">
+              {/* <div className="mb-6">
                 <Label className="text-sm font-medium text-gray-700 mb-2 block">
                   Enter Bvn
                 </Label>
@@ -740,14 +728,14 @@ export default function Withdrawal({
                             "bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                           }
                         ></BVNNumberInputs>
-              </div>
+              </div> */}
               </div>
 
             )
           }
 
           {
-            senderAccount && senderAccount?.currency === "NGN" && (
+            senderAccount && (
               <div>
 
                 <div className="flex-1">

@@ -24,12 +24,13 @@ import {
 import AccountNumberInput from "@/components/common/accountNumberInput";
 import { sanitizeInput } from "@/utils/sanitizer";
 import InlineTextLoader from "@/components/common/inlineTextLoader";
-import { AccountType, CustomerType, DepositType } from "@/utils/base.enum";
+import { AccountType, Currencies, CustomerType, DepositType } from "@/utils/base.enum";
 import CurrencyInput from "react-currency-input-field";
 import generate, { capitalizeFirstLetter } from "@/utils/randomGenerator";
 import SuccessModal from "@/components/common/SuccessModal";
 import ButtonLoaderTransactions from "@/components/common/buttonLoader";
 import { formatCurrency } from "@/utils/helper";
+import AccountCard from "../accountName";
 
 interface DepositProps {
   userType: string;
@@ -174,11 +175,11 @@ export default function Deposit({
         setNarration(
           `${capitalizeFirstLetter(depositType)} deposit by ${depositor}`
         );
-       
+
       }
 
-    }else{
-      if ( accountNumber == benefiaryAccountNumber) {
+    } else {
+      if (accountNumber == benefiaryAccountNumber) {
         toast.error("Beneficiary account number cannot be the same as sender account number", {
           position: "top-right",
           autoClose: 5000,
@@ -191,7 +192,7 @@ export default function Deposit({
           transition: Bounce,
         });
         return;
-        
+
       }
     }
     setShowDetailModal(true);
@@ -199,15 +200,15 @@ export default function Deposit({
 
   const isProceedDisabled =
     !accountNumber || !senderAccount || !amount || loading || isProcessing
-    ||(accountType == AccountType.Current && depositType == DepositType.Cheque && !chequeValidated)||
+    || (accountType == AccountType.Current && depositType == DepositType.Cheque && !chequeValidated) ||
     (userType === CustomerType.ThirdParty && (!depositor || !depositorPhone))
-    ||(accountType == AccountType.Current && depositType == DepositType.Cheque && !currency)
+    || (accountType == AccountType.Current && depositType == DepositType.Cheque && !currency)
 
-    ||(accountType == AccountType.Current && depositType == DepositType.Cheque && !benefiaryAccount)
-    ||(accountType == AccountType.Current && depositType == DepositType.Cheque && !narration)
-    ; 
+    || (accountType == AccountType.Current && depositType == DepositType.Cheque && !benefiaryAccount)
+    || (accountType == AccountType.Current && depositType == DepositType.Cheque && !narration)
+    ;
 
- 
+
 
   const validateAccount = useCallback(
     (accountNumber: string) => {
@@ -242,7 +243,7 @@ export default function Deposit({
             setSenderAccount(null);
           } else {
             if (res?.data?.getaccounts?.currency) {
-              setCurrency(res.data.currency);
+              setCurrency(res.data.getaccounts.currency);
               setSenderAccount(res.data.getaccounts);
               let glAccounType: string;
               const glcode = res.data.getaccounts.gl_code.toString();
@@ -406,25 +407,26 @@ export default function Deposit({
     const data: any = {
       accountNumber,
       transactionType: "deposit",
-      currency: senderAccount?.currency,
+      currency:  senderAccount.currency_code.toString(),
       amount,
-     
+
       accountName: senderAccount?.acc_name,
       transactionId: generate(12),
       accountStatus: "active",
-      isThirdparty:userType === CustomerType.ThirdParty ? true : false,
+      isThirdparty: userType === CustomerType.ThirdParty ? true : false,
       depositorType: userType,
       depositorName: depositor ? depositor : "Owner",
       narration: narration,
-      mobileNumber:userType===CustomerType.Self? senderAccount.mobile: depositorPhone,
+      mobileNumber: userType === CustomerType.Self ? senderAccount.mobile : depositorPhone,
       bvn: senderAccount?.customerBVN,
       branchNumber: currentUser.BRANCH_CODE,
     };
+    console.log("Deposit data: ", data);
     deposit(data)
       .then((res: any) => {
         console.log("Deposit response: ", res);
         setLoading(false);
-        if (res?.sucesss === false || res.success==="false") {
+        if (res?.sucesss === false || res.success === "false") {
           toast.error(DOMPurify.sanitize(res?.message || "An error occurred"), {
             position: "top-right",
             autoClose: 5000,
@@ -475,7 +477,7 @@ export default function Deposit({
       currency: senderAccount?.currency,
       amount,
       accountStatus: "active",
-      
+
       isThirdparty: userType === CustomerType.ThirdParty,
 
 
@@ -490,7 +492,7 @@ export default function Deposit({
       .then((res: any) => {
         console.log("Deposit response: ", res);
         setLoading(false);
-        if (res?.sucesss === false || res.success=="false") {
+        if (res?.sucesss === false || res.success == "false") {
           toast.error(DOMPurify.sanitize(res?.message || "An error occurred"), {
             position: "top-right",
             autoClose: 5000,
@@ -572,23 +574,9 @@ export default function Deposit({
           {loading ? (
             <InlineTextLoader></InlineTextLoader>
           ) : senderAccount ? (
-            <div className="mb-6">
-              <div className="bg-blue-200 text-gray-700 rounded-md px-4 py-3 space-y-1">
-                <div>
-                  <span className="font-bold">Account Name:</span>{" "}
-                  <span className="text-gray-500">
-                    {" "}
-                    {senderAccount?.acc_name || "N/A"}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-bold">Account Type:</span>{" "}
-                  <span className="text-gray-500">
-                    {senderAccount?.acc_type || "N/A"}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <AccountCard account={senderAccount} userType={userType} />
+
+
           ) : null}
 
           {(senderAccount && accountType == AccountType.Current) && (
@@ -667,23 +655,8 @@ export default function Deposit({
             {beneficiaryLoading ? (
               <InlineTextLoader></InlineTextLoader>
             ) : benefiaryAccount ? (
-              <div className="mb-6">
-                <div className="bg-blue-200 text-gray-700 rounded-md px-4 py-3 space-y-1">
-                  <div>
-                    <span className="font-bold">Account Name:</span>{" "}
-                    <span className="text-gray-500">
-                      {" "}
-                      {benefiaryAccount?.acc_name || "N/A"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-bold">Account Type:</span>{" "}
-                    <span className="text-gray-500">
-                      {benefiaryAccount?.acc_type || "N/A"}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <AccountCard account={benefiaryAccount} userType={null} />
+             
             ) : null}
 
           </div>}
@@ -697,33 +670,22 @@ export default function Deposit({
                       <Label className="text-sm font-medium text-gray-700 mb-2 block">
                         Currency
                       </Label>
-                      <Select value={currency} onValueChange={setCurrency}>
+                      <Select value={currency}>
                         <SelectTrigger className="w-full !h-12.5 rounded-full">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="NGN">NGN</SelectItem>
-                          <SelectItem
-                            value="USD"
-                            disabled
-                            className="text-gray-400"
-                          >
-                            USD
-                          </SelectItem>
-                          <SelectItem
-                            value="EU"
-                            disabled
-                            className="text-gray-400"
-                          >
-                            Euro
-                          </SelectItem>
-                          <SelectItem
-                            value="P"
-                            disabled
-                            className="text-gray-400"
-                          >
-                            Pounds
-                          </SelectItem>
+                          {Currencies.map((c) => (
+                            <SelectItem
+                              key={c.value}
+                              value={c.value}
+                              disabled={c.value !== currency} // <-- disable all except selected
+                              className={c.value !== currency ? "text-gray-400" : ""}
+                            >
+                              {c.label}
+                            </SelectItem>
+                          ))}
+
                         </SelectContent>
                       </Select>
                     </div>
@@ -752,37 +714,37 @@ export default function Deposit({
 
           {(userType === CustomerType.ThirdParty && amount) && (
             <div>
-            <div className="mb-6">
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                Depositor Name
-              </Label>
-              <input
-                type="text"
-                name="depositor"
-                id="depositor"
-                value={depositor || ""}
-                onChange={(e) => setDepositor(e.target.value)}
-                placeholder="Please enter depositor name"
-                className="bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
-              />
-            </div>
+              <div className="mb-6">
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Depositor Name
+                </Label>
+                <input
+                  type="text"
+                  name="depositor"
+                  id="depositor"
+                  value={depositor || ""}
+                  onChange={(e) => setDepositor(e.target.value)}
+                  placeholder="Please enter depositor name"
+                  className="bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
+                />
+              </div>
 
-            {/*** add depositors phone */}
+              {/*** add depositors phone */}
 
-             <div className="mb-6">
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                Depositor Phone Number
-              </Label>
-              <input
-                type="text"
-                name="depositorPhone"
-                id="depositorPhone"
-                value={depositorPhone || ""}
-                onChange={(e) => setDepositorPhone(e.target.value)}
-                placeholder="Please enter depositor phone number"
-                className="bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
-              />
-            </div>
+              <div className="mb-6">
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Depositor Phone Number
+                </Label>
+                <input
+                  type="text"
+                  name="depositorPhone"
+                  id="depositorPhone"
+                  value={depositorPhone || ""}
+                  onChange={(e) => setDepositorPhone(e.target.value)}
+                  placeholder="Please enter depositor phone number"
+                  className="bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
+                />
+              </div>
             </div>
           )}
 
