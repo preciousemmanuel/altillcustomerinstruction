@@ -22,7 +22,7 @@ import {
   chequeValidation
 } from "../../hooks/account/useTransaction";
 import { sanitizeInput } from "@/utils/sanitizer";
-import { AccountType, ChequeType, CustomerType } from "@/utils/base.enum";
+import { AccountType, ChequeType, Currencies, CustomerType } from "@/utils/base.enum";
 import CurrencyInput from "react-currency-input-field";
 import InlineTextLoader from "../common/inlineTextLoader";
 import { formatCurrency } from "@/utils/helper";
@@ -32,7 +32,7 @@ import { useNavigate } from "react-router-dom";
 import SuccessModal from "../common/SuccessModal";
 
 import PhoneNumberInputs from "../common/phonenumberInput";
-import BVNNumberInputs from "../common/bvninput";
+// import BVNNumberInputs from "../common/bvninput";
 import AccountCard from "../accountName";
 
 
@@ -121,7 +121,7 @@ export default function Withdrawal({
   const [accountNumber, setAccountNumber] = useState<string>("");
   const [accountType, setAccountType] = useState<string>("");
   const [accountSubType, setAccountSubType] = useState<string>("");
-  const [, setCurrency] = useState<string>("No currency");
+  const [currency, setCurrency] = useState<string>("No currency");
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -146,7 +146,7 @@ export default function Withdrawal({
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
   const [beneficiary, setBeneficiary] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
-  const [bvn, setBVN] = useState<string>("");
+  const [bvn] = useState<string>("");
   const navigate = useNavigate();
 
 
@@ -197,7 +197,8 @@ export default function Withdrawal({
             setSenderAccount(null);
           } else {
             if (res?.data?.getaccounts?.currency) {
-              setCurrency(res.data.currency);
+              setCurrency(res.data.getaccounts.currency);
+
               setSenderAccount(res.data.getaccounts);
               let glAccounType: string;
               let accountCategory: string;
@@ -752,17 +753,20 @@ export default function Withdrawal({
                     decimalsLimit={2}
                     allowNegativeValue={false}
                     onKeyUp={() => {
-                      if (Number(amount) > senderAccount.aval_balance) {
-                        setCFILoader(false);
-                        setResponseMessage("");
-                      } else if (amount == 0) {
-                        setCFILoader(false);
-                        setResponseMessage("");
-                      } else {
-                        setResponseMessage("");
-                        setCFILoader(true);
-                        handleKeyUp();
+                      if ( currency=="NGN") {
+                        if (Number(amount) > senderAccount.aval_balance) {
+                          setCFILoader(false);
+                          setResponseMessage("");
+                        } else if (amount == 0) {
+                          setCFILoader(false);
+                          setResponseMessage("");
+                        } else {
+                          setResponseMessage("");
+                          setCFILoader(true);
+                          handleKeyUp();
+                        }
                       }
+                      
                     }}
                     onValueChange={(value) =>
                       setAmount(value ? Number(value) : 0)
