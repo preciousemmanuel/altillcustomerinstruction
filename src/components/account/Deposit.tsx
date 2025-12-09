@@ -31,6 +31,7 @@ import SuccessModal from "@/components/common/SuccessModal";
 import ButtonLoaderTransactions from "@/components/common/buttonLoader";
 import { formatCurrency } from "@/utils/helper";
 import AccountCard from "../accountName";
+import BVNNumberInputs from "../common/bvninput";
 
 interface DepositProps {
   userType: string;
@@ -73,6 +74,7 @@ export default function Deposit({
 
   const [chequeValidated, setChequeValidated] = useState<boolean>(false);
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
+  const [bvn,setBVN] = useState<string>("");
   const [cheque, setCheque] = useState<string>("");
 
   useEffect(() => {
@@ -283,7 +285,7 @@ export default function Deposit({
               }
             } else {
               setIsProcessing(false);
-              toast.error(DOMPurify.sanitize(res?.description), {
+              toast.error(DOMPurify.sanitize(res.data.message|| res?.description), {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -362,7 +364,7 @@ export default function Deposit({
 
             } else {
               setIsProcessing(false);
-              toast.error(DOMPurify.sanitize(res?.description), {
+              toast.error(DOMPurify.sanitize(res.data.message|| res?.description), {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -409,6 +411,7 @@ export default function Deposit({
       transactionType: "deposit",
       currency:  senderAccount.currency_code.toString(),
       amount,
+      
 
       accountName: senderAccount?.acc_name,
       transactionId: generate(12),
@@ -418,7 +421,7 @@ export default function Deposit({
       depositorName: depositor ? depositor : "Owner",
       narration: narration,
       mobileNumber: userType === CustomerType.Self ? senderAccount.mobile : depositorPhone,
-      bvn: senderAccount?.customerBVN,
+      bvn: userType === CustomerType.ThirdParty?bvn: senderAccount?.customerBVN,
       branchNumber: currentUser.BRANCH_CODE,
     };
     console.log("Deposit data: ", data);
@@ -485,7 +488,7 @@ export default function Deposit({
 
       narration: narration,
 
-      bvn: senderAccount?.bvn,
+      bvn:userType === CustomerType.ThirdParty?bvn: senderAccount?.bvn,
       branchCode: currentUser.BRANCH_CODE,
     };
     chequeDeposit(data)
@@ -723,7 +726,14 @@ export default function Deposit({
                   name="depositor"
                   id="depositor"
                   value={depositor || ""}
-                  onChange={(e) => setDepositor(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                
+                    // Allow letters and spaces only
+                    if (/^[A-Za-z\s]*$/.test(value)) {
+                      setDepositor(value);
+                    }
+                  }}
                   placeholder="Please enter depositor name"
                   className="bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
                 />
@@ -740,12 +750,48 @@ export default function Deposit({
                   name="depositorPhone"
                   id="depositorPhone"
                   value={depositorPhone || ""}
-                  onChange={(e) => setDepositorPhone(e.target.value)}
+                  onChange={(e) => {
+                    // Remove anything that is not a digit
+                    const cleaned = e.target.value.replace(/\D/g, "");
+                
+                    // Allow only up to 11 digits
+                    if (cleaned.length <= 11) {
+                      setDepositorPhone(cleaned);
+                    }
+                  }}
                   placeholder="Please enter depositor phone number"
                   className="bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
                 />
               </div>
+
+
+              <div className="mb-6">
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Enter Bvn
+                </Label>
+                <BVNNumberInputs
+                          type="number"
+                          name="bvn"
+                          id="bvn"
+                          handleChange={(e) => setBVN(e.target.value)}
+                          value={bvn}
+                          labelText={""}
+                          handleInput={(e) => {
+                            e.target.value = e.target.value.replace(
+                              /[^0-9]/g,
+                              ""
+                            );
+                          }}
+                          labelFor={"bvn"}
+                          placeholder={"BVN"}
+                          customClass={
+                            "bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                          }
+                        ></BVNNumberInputs>
+              </div>
             </div>
+
+            
           )}
 
           {(accountNumber && benefiaryAccountNumber && amount && chequeValidated) ? (

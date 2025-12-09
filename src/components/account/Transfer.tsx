@@ -196,7 +196,7 @@ export default function Transfer({
               }
             } else {
               setIsProcessing(false);
-              toast.error(DOMPurify.sanitize(res?.description), {
+              toast.error(DOMPurify.sanitize(res.data.message|| res?.description), {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -300,7 +300,7 @@ export default function Transfer({
 
             } else {
               setIsProcessing(false);
-              toast.error(DOMPurify.sanitize(res?.description), {
+              toast.error(DOMPurify.sanitize(res.data.message|| res?.description), {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,

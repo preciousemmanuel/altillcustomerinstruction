@@ -34,6 +34,7 @@ import SuccessModal from "../common/SuccessModal";
 import PhoneNumberInputs from "../common/phonenumberInput";
 // import BVNNumberInputs from "../common/bvninput";
 import AccountCard from "../accountName";
+import BVNNumberInputs from "../common/bvninput";
 
 
 
@@ -146,7 +147,7 @@ export default function Withdrawal({
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
   const [beneficiary, setBeneficiary] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
-  const [bvn] = useState<string>("");
+  const [bvn,setBVN] = useState<string>("");
   const navigate = useNavigate();
 
 
@@ -245,7 +246,7 @@ export default function Withdrawal({
               }
             } else {
               setIsProcessing(false);
-              toast.error(DOMPurify.sanitize(res?.description), {
+              toast.error(DOMPurify.sanitize(res.data.message|| res?.description), {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -471,8 +472,8 @@ export default function Withdrawal({
           accountStatus: "active",
           isThirdparty: userType === CustomerType.ThirdParty,
           narration: narration,
-          bvn: "N/A",
-          //bvn: senderAccount.bvn,
+          // bvn: "N/A",
+          bvn: senderAccount.bvn,
           branchCode: currentUser.BRANCH_CODE,
           isWithinLimit:
             resp?.description?.includes("Transaction within limit") || false,
@@ -500,7 +501,7 @@ export default function Withdrawal({
           accountStatus: "active",
           isThirdparty: userType === CustomerType.ThirdParty,
           narration: narration,
-          bvn: "N/A",
+          bvn,
          // bvn: bvn==""? senderAccount.bvn : bvn,
           branchCode: currentUser.BRANCH_CODE,
           isWithinLimit:
@@ -706,7 +707,7 @@ export default function Withdrawal({
                       </div>
               </div>
 
-              {/* <div className="mb-6">
+               <div className="mb-6">
                 <Label className="text-sm font-medium text-gray-700 mb-2 block">
                   Enter Bvn
                 </Label>
@@ -729,7 +730,7 @@ export default function Withdrawal({
                             "bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                           }
                         ></BVNNumberInputs>
-              </div> */}
+              </div> 
               </div>
 
             )
