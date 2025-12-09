@@ -105,7 +105,7 @@ export class AccountService {
     transfer = async (data: any) => {
       const tokenatedData: any = await generateKey(data)
       return this.instance
-        .post('api/Transfer/ProcessTransfers', { data: tokenatedData }, {
+        .post('api/CustomerInstruction/TransferInstruction', { data: tokenatedData }, {
           
         })
         .then(res => {

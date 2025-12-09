@@ -34,6 +34,14 @@ export const limitCBNAction = () => {
     return { deposit };
   };
 
+  export const transferTransaction = () => {
+    const transfer = async (data: any) => {
+      const user = await accountService.transfer(data);
+      return user;
+    };
+    return { transfer };
+  };
+
   export const chequeDepositTransaction = () => {
     const chequeDeposit = async (data: any) => {
       const user = await accountService.chequeDeposit(data);

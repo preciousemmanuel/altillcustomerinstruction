@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Check, ChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { CustomerType } from "@/utils/base.enum";
 
 type TransactionType = "deposit" | "withdrawal" | "transfer";
 
@@ -24,6 +25,7 @@ const transactions = [
 
 export default function TransactionSelector() {
   const [selected, setSelected] = useState<TransactionType>("deposit");
+  const [availableTransactions, setAvailableTransactions] = useState<Array<any>>(transactions);
   const navigate = useNavigate();
   const location = useLocation();
   const userType = location.state?.userType;
@@ -31,6 +33,16 @@ export default function TransactionSelector() {
   useEffect(() => {
     if (!userType) {
       navigate("/home");
+    }
+  }, [userType, navigate]);
+
+  useEffect(() => {
+ 
+    if (userType && userType ==CustomerType.ThirdParty) {
+      const availableTransactions =
+  transactions.filter(t => t.id !== "transfer");
+  setAvailableTransactions(availableTransactions);
+  
     }
   }, [userType, navigate]);
 
@@ -60,7 +72,7 @@ export default function TransactionSelector() {
 
         {/* Transaction Options */}
         <div className="space-y-4 mb-8">
-          {transactions.map((transaction) => (
+          {availableTransactions.map((transaction) => (
             <button
               key={transaction.id}
               onClick={() => setSelected(transaction.id as TransactionType)}

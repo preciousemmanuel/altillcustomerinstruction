@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useGlcodes } from "@/hooks/useGlcode";
 import FullPageLoader from "@/components/common/fullpageloader";
 import FullPageError from "@/components/common/fullpageerror";
+import Transfer from "@/components/account/Transfer";
 
 export default function TransferPage() {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ export default function TransferPage() {
             Enter transaction details
             </p>
 
-            <Withdrawal
+            <Transfer
               userType={userType}
               corporateGLCodes={corporateGLCodes}
               individualCurrentGLCodes={individualCurrentGLCodes}
