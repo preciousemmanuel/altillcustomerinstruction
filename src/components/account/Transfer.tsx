@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast, ToastContainer, Bounce } from "react-toastify";
@@ -20,7 +20,7 @@ import {
   transferTransaction,
 } from "../../hooks/account/useTransaction";
 import { sanitizeInput } from "@/utils/sanitizer";
-import { AccountType, Currencies, CustomerType } from "@/utils/base.enum";
+import { AccountType, Currencies } from "@/utils/base.enum";
 import CurrencyInput from "react-currency-input-field";
 import InlineTextLoader from "../common/inlineTextLoader";
 import { formatCurrency } from "@/utils/helper";

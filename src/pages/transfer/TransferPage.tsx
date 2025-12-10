@@ -3,7 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import Withdrawal from "@/components/account/Withdrawal";
+
 import { useEffect } from "react";
 import { useGlcodes } from "@/hooks/useGlcode";
 import FullPageLoader from "@/components/common/fullpageloader";
