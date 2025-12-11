@@ -285,6 +285,27 @@ export default function Deposit({
               }
             } else {
               setIsProcessing(false);
+              if (res.data && res.data.message===accountNumber) {
+                toast.error(
+                    "Account number is  invalid",
+                    {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                        transition: Bounce,
+                    }
+                );
+                setSenderAccount(null);
+                setAccountNumber("");
+                setLoading(false);
+                return;
+                
+            }
               toast.error(DOMPurify.sanitize(res.data.message|| res?.description), {
                 position: "top-right",
                 autoClose: 5000,
@@ -364,6 +385,28 @@ export default function Deposit({
 
             } else {
               setIsProcessing(false);
+              if (res.data && res.data.message===accountNumber) {
+                toast.error(
+                    "Account number is  invalid",
+                    {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                        transition: Bounce,
+                    }
+                );
+                setBenefiaryAccount(null);
+                setBenefiaryAccountNumber("");
+                setBeneficiaryLoading(false);
+                return;
+                
+            }
+
               toast.error(DOMPurify.sanitize(res.data.message|| res?.description), {
                 position: "top-right",
                 autoClose: 5000,

@@ -118,7 +118,7 @@ export default function Withdrawal({
   individualCurrentGLCodes,
   savingsIndividualGLCodes,
 }: WithdrawalProps) {
-  const [senderAccount, setSenderAccount] = useState< any>(null);
+  const [senderAccount, setSenderAccount] = useState<any>(null);
   const [accountNumber, setAccountNumber] = useState<string>("");
   const [accountType, setAccountType] = useState<string>("");
   const [accountSubType, setAccountSubType] = useState<string>("");
@@ -135,7 +135,7 @@ export default function Withdrawal({
   const [narration, setNarration] = useState<string>("");
   const [responseMessage, setResponseMessage] = useState<string>("");
   const [, setLimitAmount] = useState<number>(0);
-  const [excessAmount, ] = useState<number>(0);
+  const [excessAmount,] = useState<number>(0);
   const [cfiloader, setCFILoader] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [queueNumber, setQueueNumber] = useState("");
@@ -147,7 +147,7 @@ export default function Withdrawal({
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
   const [beneficiary, setBeneficiary] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
-  const [bvn,setBVN] = useState<string>("");
+  const [bvn, setBVN] = useState<string>("");
   const navigate = useNavigate();
 
 
@@ -176,7 +176,7 @@ export default function Withdrawal({
       setAccountType("");
       setAccountSubType("");
       validate(accountNumber)
-        .then((res:any) => {
+        .then((res: any) => {
           setIsProcessing(false);
           const responseMessage = res?.description;
           console.log({ res });
@@ -246,7 +246,28 @@ export default function Withdrawal({
               }
             } else {
               setIsProcessing(false);
-              toast.error(DOMPurify.sanitize(res.data.message|| res?.description), {
+              if (res.data && res.data.message===accountNumber) {
+                toast.error(
+                    "Account number is  invalid",
+                    {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                        transition: Bounce,
+                    }
+                );
+                setSenderAccount(null);
+                setAccountNumber("");
+                setLoading(false);
+                return;
+                
+            }
+              toast.error(DOMPurify.sanitize(res.data.message || res?.description), {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -502,7 +523,7 @@ export default function Withdrawal({
           isThirdparty: userType === CustomerType.ThirdParty,
           narration: narration,
           bvn,
-         // bvn: bvn==""? senderAccount.bvn : bvn,
+          // bvn: bvn==""? senderAccount.bvn : bvn,
           branchCode: currentUser.BRANCH_CODE,
           isWithinLimit:
             resp?.description?.includes("Transaction within limit") || false,
@@ -519,7 +540,7 @@ export default function Withdrawal({
 
       console.log("withdrawal response: ", res);
       setLoading(false);
-      if (res?.sucesss === false || res.success==="false") {
+      if (res?.sucesss === false || res.success === "false") {
         toast.error(DOMPurify.sanitize(res.message || "An error occurred"), {
           position: "top-right",
           autoClose: 5000,
@@ -554,14 +575,16 @@ export default function Withdrawal({
         }
       );
     }
-    
-    
-    
-    
-     
+
+
+
+
+
   };
   const isProceedDisabled =
-    !accountNumber || !senderAccount || !amount || loading || isProcessing || cfiloader || (chequeType==ChequeType.Cheque && !chequeValidated && accountType==AccountType.Current) || (userType==CustomerType.ThirdParty && !beneficiary && accountType==AccountType.Current);
+    !accountNumber || !senderAccount || !amount || loading || isProcessing || cfiloader
+    || (senderAccount && Number(amount) > senderAccount.aval_balance)
+    || (chequeType == ChequeType.Cheque && !chequeValidated && accountType == AccountType.Current) || (userType == CustomerType.ThirdParty && !beneficiary && accountType == AccountType.Current);
 
 
   return (
@@ -594,9 +617,9 @@ export default function Withdrawal({
 
           {loading ? (
             <InlineTextLoader></InlineTextLoader>
-          ) : senderAccount  ? (
+          ) : senderAccount ? (
             <AccountCard account={senderAccount} userType={userType} />
-           
+
           ) : null}
 
           {/* {(senderAccount && senderAccount?.currency !== "NGN") ? (
@@ -663,74 +686,74 @@ export default function Withdrawal({
             </div>
           )}
           {
-            senderAccount && accountType == AccountType.Current && userType==CustomerType.ThirdParty && (
+            senderAccount && accountType == AccountType.Current && userType == CustomerType.ThirdParty && (
               <div>
-              <div className="mb-6">
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Beneficiary Name
-                </Label>
-                <input
-                  type="text"
-                  name="depositor"
-                  id="depositor"
-                  value={beneficiary || ""}
-                  onChange={(e) => setBeneficiary(e.target.value)}
-                  placeholder="Please enter beneficiary name"
-                  className="bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
-                />
-              </div>
-  
-              {/*** add depositors phone */}
-  
-               <div className="mb-6">
-                
-                <div>
-                        <PhoneNumberInputs
-                          type="number"
-                          name="phone"
-                          id="phone"
-                          handleChange={(e) => setPhone(e.target.value)}
-                          handleInput={(e) => {
-                            e.target.value = e.target.value.replace(
-                              /[^0-9]/g,
-                              ""
-                            );
-                          }}
-                          value={phone}
-                          labelText={"Phone Number"}
-                          labelFor={"Phone Number"}
-                          placeholder={"080475784..."}
-                          customClass={
-                            "bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                          }
-                        ></PhoneNumberInputs>
-                      </div>
-              </div>
+                <div className="mb-6">
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Beneficiary Name
+                  </Label>
+                  <input
+                    type="text"
+                    name="depositor"
+                    id="depositor"
+                    value={beneficiary || ""}
+                    onChange={(e) => setBeneficiary(e.target.value)}
+                    placeholder="Please enter beneficiary name"
+                    className="bg-white-50 h-[50px] border border-gray-200 text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full pl-8"
+                  />
+                </div>
 
-               <div className="mb-6">
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Enter Bvn
-                </Label>
-                <BVNNumberInputs
-                          type="number"
-                          name="bvn"
-                          id="bvn"
-                          handleChange={(e) => setBVN(e.target.value)}
-                          value={bvn}
-                          labelText={""}
-                          handleInput={(e) => {
-                            e.target.value = e.target.value.replace(
-                              /[^0-9]/g,
-                              ""
-                            );
-                          }}
-                          labelFor={"bvn"}
-                          placeholder={"BVN"}
-                          customClass={
-                            "bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                          }
-                        ></BVNNumberInputs>
-              </div> 
+                {/*** add depositors phone */}
+
+                <div className="mb-6">
+
+                  <div>
+                    <PhoneNumberInputs
+                      type="number"
+                      name="phone"
+                      id="phone"
+                      handleChange={(e) => setPhone(e.target.value)}
+                      handleInput={(e) => {
+                        e.target.value = e.target.value.replace(
+                          /[^0-9]/g,
+                          ""
+                        );
+                      }}
+                      value={phone}
+                      labelText={"Phone Number"}
+                      labelFor={"Phone Number"}
+                      placeholder={"080475784..."}
+                      customClass={
+                        "bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      }
+                    ></PhoneNumberInputs>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Enter Bvn
+                  </Label>
+                  <BVNNumberInputs
+                    type="number"
+                    name="bvn"
+                    id="bvn"
+                    handleChange={(e) => setBVN(e.target.value)}
+                    value={bvn}
+                    labelText={""}
+                    handleInput={(e) => {
+                      e.target.value = e.target.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    }}
+                    labelFor={"bvn"}
+                    placeholder={"BVN"}
+                    customClass={
+                      "bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                    }
+                  ></BVNNumberInputs>
+                </div>
               </div>
 
             )
@@ -754,7 +777,7 @@ export default function Withdrawal({
                     decimalsLimit={2}
                     allowNegativeValue={false}
                     onKeyUp={() => {
-                      if ( currency=="NGN") {
+                      if (currency == "NGN") {
                         if (Number(amount) > senderAccount.aval_balance) {
                           setCFILoader(false);
                           setResponseMessage("");
@@ -767,7 +790,7 @@ export default function Withdrawal({
                           handleKeyUp();
                         }
                       }
-                      
+
                     }}
                     onValueChange={(value) =>
                       setAmount(value ? Number(value) : 0)
@@ -792,6 +815,20 @@ export default function Withdrawal({
                         </>
                       )}
                   </p>
+
+                  {/* {(senderAccount && currency != "NGN") && (amount > 0 && Number(amount) < senderAccount.aval_balance) &&
+
+                    <p className="text-[#FF0000] text-sm mt-2">
+
+                      <>
+                        <div className="flex gap-2 items-start">
+                          <InfoCircle size={20} />
+                          <p>Amount to withdraw above available balance</p>
+                        </div>
+                      </>
+
+                    </p>
+                  } */}
                   {excessAmount !== 0 ? (
                     <p className="text-[#FF0000] text-normal mt-[-15px] text-sm">
                       Amount exceeds CBN withdrawal limit for individual
@@ -824,9 +861,9 @@ export default function Withdrawal({
               Proceed
             </Button>
             <Button
-            onClick={() => navigate("/home")}
+              onClick={() => navigate("/home")}
               variant="outline"
-              
+
               className="flex-1 border-red-300 text-red-600 h-12 rounded-full font-medium bg-transparent"
             >
               Cancel
