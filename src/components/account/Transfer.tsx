@@ -20,7 +20,7 @@ import {
     transferTransaction,
 } from "../../hooks/account/useTransaction";
 import { sanitizeInput } from "@/utils/sanitizer";
-import {  Currencies } from "@/utils/base.enum";
+import { Currencies } from "@/utils/base.enum";
 import CurrencyInput from "react-currency-input-field";
 import InlineTextLoader from "../common/inlineTextLoader";
 import { formatCurrency } from "@/utils/helper";
@@ -199,7 +199,7 @@ export default function Transfer({
                             }
                         } else {
                             setIsProcessing(false);
-                            if (res.data && res.data.message===accountNumber) {
+                            if (res.data && res.data.message === accountNumber) {
                                 toast.error(
                                     "Account number is  invalid",
                                     {
@@ -218,7 +218,7 @@ export default function Transfer({
                                 setAccountNumber("");
                                 setLoading(false);
                                 return;
-                                
+
                             }
                             toast.error(DOMPurify.sanitize(res.data.message || res?.description), {
                                 position: "top-right",
@@ -293,7 +293,7 @@ export default function Transfer({
                 return;
             }
             //check if beneficiary account number is same as sender account number
-            if (senderAccount&& (accountNumber === senderAccount.account_no)) {
+            if (senderAccount && (accountNumber === senderAccount.account_no)) {
                 toast.error("Beneficiary account number cannot be same as sender account number", {
                     position: "top-right",
                     autoClose: 5000,
@@ -342,7 +342,7 @@ export default function Transfer({
                             setIsProcessing(false);
                             setBenefiaryAccountNumber(null);
 
-                            if (res.data && res.data.message===accountNumber) {
+                            if (res.data && res.data.message === accountNumber) {
                                 toast.error(
                                     "Account number is  invalid",
                                     {
@@ -357,13 +357,13 @@ export default function Transfer({
                                         transition: Bounce,
                                     }
                                 );
-                                
+
                                 // setSenderAccount(null);
                                 // setAccountNumber("");
                                 setBeneficiaryLoading(false);
                                 setLoading(false);
                                 return;
-                                
+
                             }
                             toast.error(DOMPurify.sanitize(res.data.message || res?.description), {
                                 position: "top-right",
@@ -512,7 +512,7 @@ export default function Transfer({
 
     };
     const isProceedDisabled =
-        !accountNumber || !senderAccount || !amount || loading || isProcessing || !benefiaryAccount || !currency;
+        !accountNumber || !senderAccount || !amount || loading || isProcessing || !benefiaryAccount || !currency || (senderAccount && Number(amount) > senderAccount.aval_balance);
 
 
     return (
@@ -670,7 +670,11 @@ export default function Transfer({
                         </div>
                     ) : null}
 
-
+                    {(senderAccount && amount) && Number(amount) > senderAccount.aval_balance ? (
+                        <p className="text-[#FF0000] text-normal mt-[15px] text-sm">
+                            Insufficient balance for this transaction
+                        </p>
+                    ) : null}
 
 
                     <div className="flex gap-3 mt-8">
