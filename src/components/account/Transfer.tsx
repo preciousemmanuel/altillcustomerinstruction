@@ -623,7 +623,7 @@ export default function Transfer({
                         )
                     }
 
-                    {(senderAccount && benefiaryAccount && amount) && (
+                    {(senderAccount && benefiaryAccount && amount) ? (
                         <div className="mb-8">
                             <div className="flex gap-3">
                                 {senderAccount && (
@@ -653,7 +653,7 @@ export default function Transfer({
                                 )}
                             </div>
                         </div>
-                    )}
+                    ):null}
 
 
                     {(senderAccount && benefiaryAccount && amount) ? (
