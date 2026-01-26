@@ -758,7 +758,7 @@ export default function Deposit({
             </div>
           )}
 
-          {(userType === CustomerType.ThirdParty && amount) && (
+          {(userType === CustomerType.ThirdParty && amount) ? (
             <div>
               <div className="mb-6">
                 <Label className="text-sm font-medium text-gray-700 mb-2 block">
@@ -835,7 +835,7 @@ export default function Deposit({
             </div>
 
             
-          )}
+          ):null}
 
           {(accountNumber && benefiaryAccountNumber && amount && chequeValidated) ? (
             <div className="mt-4 mb-4">
