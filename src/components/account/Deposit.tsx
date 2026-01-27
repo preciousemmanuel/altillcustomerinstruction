@@ -523,7 +523,7 @@ export default function Deposit({
       currency: senderAccount?.currency,
       amount,
       accountStatus: "active",
-
+      accountType: accountType,
       isThirdparty: userType === CustomerType.ThirdParty,
 
 

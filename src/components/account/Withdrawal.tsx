@@ -141,7 +141,7 @@ export default function Withdrawal({
   const [queueNumber, setQueueNumber] = useState("");
   const [resp, setResp] = useState<CbnLimitResponse | null>(null);
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  const [chequeType, setChequeType] = useState<string>("");
+  const [chequeType, setChequeType] = useState<string>("cheque");
   const [cheque, setCheque] = useState<string>("");
   const [chequeValidated, setChequeValidated] = useState<boolean>(false);
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
@@ -640,7 +640,9 @@ export default function Withdrawal({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="cheque">Cheque</SelectItem>
+                   { userType === CustomerType.Self &&
                     <SelectItem value="counter">Counter Cheque</SelectItem>
+                   }
                   </SelectContent>
                 </Select>
               </div>
