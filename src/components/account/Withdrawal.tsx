@@ -396,7 +396,7 @@ export default function Withdrawal({
   };
 
   const chequeValidationAction = async () => {
-    if (cheque?.length < 0) {
+    if (!cheque || cheque?.length < 0) {
       return;
     }
     setLoadingCheque(true);
@@ -663,7 +663,10 @@ export default function Withdrawal({
                   value={cheque}
                   handleChange={(e) => setCheque(e.target.value)}
                   handleInput={(e) => {
-                    e.target.value = sanitizeInput(e.target.value);
+                    e.target.value = sanitizeInput(e.target.value.replace(
+                      /[^0-9]/g,
+                      ""
+                    ));
                   }}
                   onBlur={() => chequeValidationAction()}
                   labelText={chequeType == ChequeType.Cheque ? `Enter cheque number` : `Enter counter cheque number`}

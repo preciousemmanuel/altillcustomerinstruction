@@ -86,8 +86,8 @@ export default function Deposit({
     }
   }, [navigate]);
 
-  const chequeValidationAction = async () => {
-    if (cheque?.length < 0) {
+  const chequeValidationAction = async (cheque:string) => {
+    if (!cheque || cheque?.length < 0) {
       return;
     }
     setLoadingCheque(true);
@@ -167,17 +167,18 @@ export default function Deposit({
 
     if (depositType != "cheque") {
       if (userType == CustomerType.Self) {
-        setDepositor(senderAccount?.name);
+        setDepositor(senderAccount?.acc_name);
         setNarration(
-          `${capitalizeFirstLetter(depositType)} deposit by ${senderAccount?.name
+          `${capitalizeFirstLetter(depositType)} deposit by ${senderAccount?.acc_name
           }`
         );
+        console.log("Narration set for self deposit.");
       } else {
         // setDepositor(null);
         setNarration(
           `${capitalizeFirstLetter(depositType)} deposit by ${depositor}`
         );
-
+//console.log("Narration set for third-party deposit.",depositType,"dsdd");
       }
 
     } else {
@@ -197,6 +198,7 @@ export default function Deposit({
 
       }
     }
+    console.log("Proceeding with deposit.",narration);
     setShowDetailModal(true);
   };
 
@@ -656,7 +658,7 @@ export default function Deposit({
                     ""
                   ));
                 }}
-                onBlur={() => chequeValidationAction()}
+                onBlur={() => chequeValidationAction(cheque)}
                 labelText={"Cheque Number"}
                 labelFor={""}
                 placeholder={"Please enter cheque number"}
