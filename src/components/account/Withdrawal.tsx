@@ -600,7 +600,7 @@ export default function Withdrawal({
               value={accountNumber}
               handleChange={(e) => setAccountNumber(e.target.value)}
               handleInput={(e) => {
-                e.target.value = sanitizeInput(e.target.value.replace(
+                e.currentTarget.value = sanitizeInput(e.currentTarget.value.replace(
                   /[^0-9]/g,
                   ""
                 ));
@@ -663,7 +663,7 @@ export default function Withdrawal({
                   value={cheque}
                   handleChange={(e) => setCheque(e.target.value)}
                   handleInput={(e) => {
-                    e.target.value = sanitizeInput(e.target.value.replace(
+                    e.currentTarget.value = sanitizeInput(e.currentTarget.value.replace(
                       /[^0-9]/g,
                       ""
                     ));

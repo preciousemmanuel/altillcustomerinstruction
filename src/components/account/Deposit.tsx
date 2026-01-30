@@ -603,7 +603,7 @@ export default function Deposit({
               value={accountNumber}
               handleChange={(e) => setAccountNumber(e.target.value)}
               handleInput={(e) => {
-                e.target.value = sanitizeInput(e.target.value.replace(
+                e.currentTarget.value = sanitizeInput(e.currentTarget.value.replace(
                   /[^0-9]/g,
                   ""
                 ));
@@ -653,7 +653,7 @@ export default function Deposit({
                 value={cheque}
                 handleChange={(e) => setCheque(e.target.value)}
                 handleInput={(e) => {
-                  e.target.value = sanitizeInput(e.target.value.replace(
+                  e.currentTarget.value = sanitizeInput(e.currentTarget.value.replace(
                     /[^0-9]/g,
                     ""
                   ));
@@ -688,7 +688,7 @@ export default function Deposit({
                 value={benefiaryAccountNumber}
                 handleChange={(e) => setBenefiaryAccountNumber(e.target.value)}
                 handleInput={(e) => {
-                  e.target.value = sanitizeInput(e.target.value);
+                  e.currentTarget.value = sanitizeInput(e.currentTarget.value);
                 }}
                 onBlur={() => validateBeneficiaryAccount(benefiaryAccountNumber)}
                 labelText={"Beneficiary Account Number"}

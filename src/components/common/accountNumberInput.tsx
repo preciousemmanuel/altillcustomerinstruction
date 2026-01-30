@@ -29,7 +29,7 @@ export default function AccountNumberInput({
   disabled?: boolean;
   maxLength?: number;
   onBlur?: () => void;
-  handleInput?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleInput?: (event: React.FormEvent<HTMLInputElement>) => void;
 }) {
   return (
     <div className="my-5">

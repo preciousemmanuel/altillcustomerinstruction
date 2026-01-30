@@ -528,7 +528,7 @@ export default function Transfer({
                             value={accountNumber}
                             handleChange={(e) => setAccountNumber(e.target.value)}
                             handleInput={(e) => {
-                                e.target.value = sanitizeInput(e.target.value.replace(
+                                e.currentTarget.value = sanitizeInput(e.currentTarget.value.replace(
                                     /[^0-9]/g,
                                     ""
                                 ));
@@ -566,7 +566,7 @@ export default function Transfer({
                                 handleChange={(e) => setBenefiaryAccountNumber(e.target.value)}
                                 handleInput={(e) => {
 
-                                    e.target.value = sanitizeInput(e.target.value.replace(
+                                    e.currentTarget.value = sanitizeInput(e.currentTarget.value.replace(
                                         /[^0-9]/g,
                                         ""
                                     ));
