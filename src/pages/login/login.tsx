@@ -125,6 +125,7 @@ function LoginForm() {
       >
         {isLoading ? <LoaderCircle className="animate-spin" /> : "Login"}
       </Button>
+      <p className="text-center text-sm mt-5 font-bold">V1.0</p>
     </form>
   );
 }
