@@ -25,7 +25,7 @@ export default function BVNNumberInputs({
   placeholder?: string;
   customClass?: string;
   disabled?: boolean;
-  handleInput?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleInput?: (event: React.FormEvent<HTMLInputElement>) => void;
 }) {
   return (
     <div className="my-5">

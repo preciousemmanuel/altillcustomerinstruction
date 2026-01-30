@@ -719,7 +719,7 @@ export default function Withdrawal({
                       id="phone"
                       handleChange={(e) => setPhone(e.target.value)}
                       handleInput={(e) => {
-                        e.target.value = e.target.value.replace(
+                        e.currentTarget.value = e.currentTarget.value.replace(
                           /[^0-9]/g,
                           ""
                         );
@@ -747,7 +747,7 @@ export default function Withdrawal({
                     value={bvn}
                     labelText={""}
                     handleInput={(e) => {
-                      e.target.value = e.target.value.replace(
+                      e.currentTarget.value = e.currentTarget.value.replace(
                         /[^0-9]/g,
                         ""
                       );
