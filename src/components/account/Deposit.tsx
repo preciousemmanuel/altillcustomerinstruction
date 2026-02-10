@@ -74,7 +74,7 @@ export default function Deposit({
 
   const [chequeValidated, setChequeValidated] = useState<boolean>(false);
   const [loadingCheque, setLoadingCheque] = useState<boolean>(false);
-  const [bvn,setBVN] = useState<string>("");
+  const [bvn, setBVN] = useState<string>("");
   const [cheque, setCheque] = useState<string>("");
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function Deposit({
     }
   }, [navigate]);
 
-  const chequeValidationAction = async (cheque:string) => {
+  const chequeValidationAction = async (cheque: string) => {
     if (!cheque || cheque?.length < 0) {
       return;
     }
@@ -178,7 +178,7 @@ export default function Deposit({
         setNarration(
           `${capitalizeFirstLetter(depositType)} deposit by ${depositor}`
         );
-//console.log("Narration set for third-party deposit.",depositType,"dsdd");
+        //console.log("Narration set for third-party deposit.",depositType,"dsdd");
       }
 
     } else {
@@ -198,7 +198,7 @@ export default function Deposit({
 
       }
     }
-    console.log("Proceeding with deposit.",narration);
+    console.log("Proceeding with deposit.", narration);
     setShowDetailModal(true);
   };
 
@@ -287,28 +287,28 @@ export default function Deposit({
               }
             } else {
               setIsProcessing(false);
-              if (res.data && res.data.message===accountNumber) {
+              if (res.data && res.data.message === accountNumber) {
                 toast.error(
-                    "Account number is  invalid",
-                    {
-                        position: "top-right",
-                        autoClose: 5000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: "light",
-                        transition: Bounce,
-                    }
+                  "Account number is  invalid",
+                  {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    transition: Bounce,
+                  }
                 );
                 setSenderAccount(null);
                 setAccountNumber("");
                 setLoading(false);
                 return;
-                
-            }
-              toast.error(DOMPurify.sanitize(res.data.message|| res?.description), {
+
+              }
+              toast.error(DOMPurify.sanitize(res.data.message || res?.description), {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -387,29 +387,29 @@ export default function Deposit({
 
             } else {
               setIsProcessing(false);
-              if (res.data && res.data.message===accountNumber) {
+              if (res.data && res.data.message === accountNumber) {
                 toast.error(
-                    "Account number is  invalid",
-                    {
-                        position: "top-right",
-                        autoClose: 5000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: "light",
-                        transition: Bounce,
-                    }
+                  "Account number is  invalid",
+                  {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    transition: Bounce,
+                  }
                 );
                 setBenefiaryAccount(null);
                 setBenefiaryAccountNumber("");
                 setBeneficiaryLoading(false);
                 return;
-                
-            }
 
-              toast.error(DOMPurify.sanitize(res.data.message|| res?.description), {
+              }
+
+              toast.error(DOMPurify.sanitize(res.data.message || res?.description), {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -454,9 +454,9 @@ export default function Deposit({
     const data: any = {
       accountNumber,
       transactionType: "deposit",
-      currency:  senderAccount.currency_code.toString(),
+      currency: senderAccount.currency_code.toString(),
       amount,
-      
+
 
       accountName: senderAccount?.acc_name,
       transactionId: generate(12),
@@ -466,7 +466,7 @@ export default function Deposit({
       depositorName: depositor ? depositor : "Owner",
       narration: narration,
       mobileNumber: userType === CustomerType.Self ? senderAccount.mobile : depositorPhone,
-      bvn: userType === CustomerType.ThirdParty?bvn: senderAccount?.customerBVN,
+      bvn: userType === CustomerType.ThirdParty ? bvn : senderAccount?.customerBVN,
       branchNumber: currentUser.BRANCH_CODE,
     };
     console.log("Deposit data: ", data);
@@ -533,7 +533,7 @@ export default function Deposit({
 
       narration: narration,
 
-      bvn:userType === CustomerType.ThirdParty?bvn: senderAccount?.bvn,
+      bvn: userType === CustomerType.ThirdParty ? bvn : senderAccount?.bvn,
       branchCode: currentUser.BRANCH_CODE,
     };
     chequeDeposit(data)
@@ -704,7 +704,7 @@ export default function Deposit({
               <InlineTextLoader></InlineTextLoader>
             ) : benefiaryAccount ? (
               <AccountCard account={benefiaryAccount} userType={null} />
-             
+
             ) : null}
 
           </div>}
@@ -773,7 +773,7 @@ export default function Deposit({
                   value={depositor || ""}
                   onChange={(e) => {
                     const value = e.target.value;
-                
+
                     // Allow letters and spaces only
                     if (/^[A-Za-z\s]*$/.test(value)) {
                       setDepositor(value);
@@ -788,7 +788,7 @@ export default function Deposit({
 
               <div className="mb-6">
                 <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Depositor Phone Number
+                  Depositor's 11 Digit Phone Number
                 </Label>
                 <input
                   type="text"
@@ -798,7 +798,7 @@ export default function Deposit({
                   onChange={(e) => {
                     // Remove anything that is not a digit
                     const cleaned = e.target.value.replace(/\D/g, "");
-                
+
                     // Allow only up to 11 digits
                     if (cleaned.length <= 11) {
                       setDepositorPhone(cleaned);
@@ -812,32 +812,32 @@ export default function Deposit({
 
               <div className="mb-6">
                 <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Enter Bvn
+                  Enter Bvn(Optional)
                 </Label>
                 <BVNNumberInputs
-                          type="number"
-                          name="bvn"
-                          id="bvn"
-                          handleChange={(e) => setBVN(e.target.value)}
-                          value={bvn}
-                          labelText={""}
-                          handleInput={(e) => {
-                            e.currentTarget.value = e.currentTarget.value.replace(
-                              /[^0-9]/g,
-                              ""
-                            );
-                          }}
-                          labelFor={"bvn"}
-                          placeholder={"BVN"}
-                          customClass={
-                            "bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                          }
-                        ></BVNNumberInputs>
+                  type="number"
+                  name="bvn"
+                  id="bvn"
+                  handleChange={(e) => setBVN(e.target.value)}
+                  value={bvn}
+                  labelText={""}
+                  handleInput={(e) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9]/g,
+                      ""
+                    );
+                  }}
+                  labelFor={"bvn"}
+                  placeholder={"BVN"}
+                  customClass={
+                    "bg-white-50 border border-gray-200 h-[48px] text-gray-900 sm:text-sm rounded-full focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                  }
+                ></BVNNumberInputs>
               </div>
             </div>
 
-            
-          ):null}
+
+          ) : null}
 
           {(accountNumber && benefiaryAccountNumber && amount && chequeValidated) ? (
             <div className="mt-4 mb-4">
