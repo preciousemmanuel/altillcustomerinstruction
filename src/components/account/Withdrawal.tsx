@@ -246,27 +246,27 @@ export default function Withdrawal({
               }
             } else {
               setIsProcessing(false);
-              if (res.data && res.data.message===accountNumber) {
+              if (res.data && res.data.message === accountNumber) {
                 toast.error(
-                    "Account number is  invalid",
-                    {
-                        position: "top-right",
-                        autoClose: 5000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: "light",
-                        transition: Bounce,
-                    }
+                  "Account number is  invalid",
+                  {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    transition: Bounce,
+                  }
                 );
                 setSenderAccount(null);
                 setAccountNumber("");
                 setLoading(false);
                 return;
-                
-            }
+
+              }
               toast.error(DOMPurify.sanitize(res.data.message || res?.description), {
                 position: "top-right",
                 autoClose: 5000,
@@ -640,9 +640,9 @@ export default function Withdrawal({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="cheque">Cheque</SelectItem>
-                   { userType === CustomerType.Self &&
-                    <SelectItem value="counter">Counter Cheque</SelectItem>
-                   }
+                    {userType === CustomerType.Self &&
+                      <SelectItem value="counter">Counter Cheque</SelectItem>
+                    }
                   </SelectContent>
                 </Select>
               </div>
@@ -725,7 +725,7 @@ export default function Withdrawal({
                         );
                       }}
                       value={phone}
-                      labelText={"Phone Number"}
+                      labelText={"Beneficiary's 11 Digit Phone Number"}
                       labelFor={"Phone Number"}
                       placeholder={"080475784..."}
                       customClass={
@@ -737,7 +737,7 @@ export default function Withdrawal({
 
                 <div className="mb-6">
                   <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                    Enter Bvn
+                    Enter Bvn(Optional)
                   </Label>
                   <BVNNumberInputs
                     type="number"

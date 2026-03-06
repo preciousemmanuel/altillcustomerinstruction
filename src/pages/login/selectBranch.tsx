@@ -15,6 +15,8 @@ const SelectBranch = () => {
       return;
     }
 
+    console.log("branchList", branchList);
+
     branchList = typeof branchList === "string" ? branchList : "";
     if (Object.keys(branchList).length !== 0) {
       const branchData = JSON.parse(branchList);
@@ -49,11 +51,10 @@ const SelectBranch = () => {
         {branches.length > 0 ? (
           branches.map((branch, i) => (
             <div
-              className={`flex items-center gap-2 rounded-xl p-2 my-8 ${
-                selectedBranchCode === branch.BRANCH_CODE
+              className={`flex items-center gap-2 rounded-xl p-2 my-8 ${selectedBranchCode === branch.BRANCH_CODE
                   ? "border border-[#304DAF]"
                   : "hover:border hover:border-gray-300"
-              }`}
+                }`}
               key={i}
               onClick={() => handleBranchSelect(branch.BRANCH_CODE)}
             >

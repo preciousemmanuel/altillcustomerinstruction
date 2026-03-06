@@ -37,15 +37,15 @@ export async function decodeKey(
 }
 
 export async function decodeData(
-  token: string
+  token: any
 ): Promise<Record<string, unknown> | null> {
   try {
-    if (typeof token !== "string") {
-      console.error("Invalid token format. Token must be a string.");
-      return null;
-    }
+    // if (typeof token !== "string") {
+    //   console.error("Invalid token format. Token must be a string.");
+    //   return null;
+    // }
 
-    const { payload } = await jose.jwtVerify(token, secret);
+    // const { payload } = await jose.jwtVerify(token, secret);
 
     // Function to lowercase only the first letter of a string
     function lowercaseFirstLetter(str: string): string {
@@ -55,7 +55,7 @@ export async function decodeData(
 
     // Normalize payload keys
     const normalizedPayload = Object.fromEntries(
-      Object.entries(payload).map(([key, value]) => [
+      Object.entries(token).map(([key, value]) => [
         lowercaseFirstLetter(key),
         value,
       ])
@@ -75,7 +75,7 @@ function _toLowerCaseKeys<T extends Record<string, any>>(
   if (visited.has(obj)) {
     return obj; // Circular reference detected, return object as is.
   }
-  if(obj) visited.add(obj);
+  if (obj) visited.add(obj);
 
   return Object.fromEntries(
     Object.entries(obj).map(([key, value]) => [
@@ -89,7 +89,7 @@ function _toLowerCaseKeys<T extends Record<string, any>>(
 
 
 export function toLowerCaseKeys<T extends Record<string, any>>(obj: T): T {
-  if(!obj) return obj
+  if (!obj) return obj
   return _toLowerCaseKeys(obj, new Set());
 }
 

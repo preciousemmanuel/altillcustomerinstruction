@@ -13,6 +13,7 @@ import { decodeData } from "@/utils/jwtToken";
 interface DecodedDataResponse {
   data?: {
     Data?: Record<string, unknown>;
+    data?: Record<string, unknown>;
   };
 }
 
@@ -62,13 +63,16 @@ function LoginForm() {
     try {
       setIsLoading(true);
       const res = await login(password, userName, token);
+      console.log("loginres", res.data.data)
       if (res) {
         const decodedRes = (await decodeData(
           res?.data.data
         )) as DecodedDataResponse;
+
+        console.log("decodedRes", decodedRes?.data)
         localStorage.setItem(
           "branchToken",
-          JSON.stringify(decodedRes?.data?.Data as Record<string, unknown>)
+          JSON.stringify((decodedRes?.data?.Data || decodedRes?.data) as Record<string, unknown>)
         );
         navigate("/select-branch");
       }

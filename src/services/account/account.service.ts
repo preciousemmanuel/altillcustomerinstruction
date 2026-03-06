@@ -1,161 +1,87 @@
-import axios, { type AxiosInstance } from "axios";
-import { generateKey,decodeKey,generateforString } from "../../utils/jwtToken";
+import { BaseService } from "../base.service";
+import { encryptionService } from "../encryption.service";
 import { safeQuery } from "@/utils/sanitizer";
 
 
 
-export class AccountService {
-    protected readonly instance: AxiosInstance
-    public constructor(url: any) {
-      this.instance = axios.create({
-        baseURL: url,
-        timeout: 50000,
-        timeoutErrorMessage: 'Time out!'
-      })
-      this.setupInterceptors();
-    }
-  
-    private setupInterceptors() {
-      this.instance.interceptors.response.use(
-        (response) => {
-          if (response?.status === 401) {
-            window.location.href = "/login";
-          }
-          return response;
-        },
-        (error) => {
-          if (error.response?.status === 401) {
-            window.location.href = "/login";
-          }
-          return Promise.reject(error);
-        }
-      );
-    }
-  
-    validate = async (accountNumber: string) => {
-      const encryptedAccountNumber: any = await generateforString(accountNumber);
-  
-      return this.instance
-        .get(`api/CustomerInstruction/CustomerInformation?accountNumber=${safeQuery(encryptedAccountNumber)}`, {
-          
-        })
-        .then(async res => {
-          // const retrievedData = await decodeKey(res.data.data)
-          return decodeKey(res.data.data)
-        })
-    }
-  
-    validateCode = async (transCode: string) => {
-      // const encryptedAccountNumber: any = await generateforString(transCode);
-  
-      return this.instance
-        .get(`/api/Transactions/GetLoggedTransaction?transactionId=${safeQuery(transCode)}`, {
-          
-        })
-        .then(res => {
-          return decodeKey(res.data.data)
-        })
-    }
-  
-    validateBVN = async (bvnNumber: number) => {
-      const encryptedBvnNumber: any = await generateforString(bvnNumber);
-  
-      return this.instance
-        .get(`api/ThirdPartyContorller/ValidateBvn?bvn=${safeQuery(encryptedBvnNumber)}`, {
-          
-        })
-        .then(res => {
-          return decodeKey(res.data.data)
-        })
-    }
-  
-    deposit = async (data: any) => {
-      const tokenatedData: any = await generateKey(data)
-      return this.instance
-        .post('api/CustomerInstruction/Deposit', { data: tokenatedData }, {
-          
-        })
-        .then(res => {
-          return decodeKey(res.data.data)
-        })
-    }
+export class AccountService extends BaseService {
+  validate = async (accountNumber: string) => {
+    const encryptedAccountNumber = encryptionService.encrypt(accountNumber);
 
-    chequeDeposit = async (data: any) => {
-      const tokenatedData: any = await generateKey(data)
-      return this.instance
-        .post('api/CustomerInstruction/QueueChequeDeposit', { data: tokenatedData }, {
-          
-        })
-        .then(res => {
-          return decodeKey(res.data.data)
-        })
-    }
-  
-    withdraw = async (data: any) => {
-      const tokenatedData: any = await generateKey(data)
-      return this.instance
-        .post('api/CustomerInstruction/SavingsWithdrawal', { data: tokenatedData }, {
-          
-        })
-        .then(res => {
-          return decodeKey(res.data.data)
-        })
-    }
-  
-    transfer = async (data: any) => {
-      const tokenatedData: any = await generateKey(data)
-      return this.instance
-        .post('api/CustomerInstruction/TransferInstruction', { data: tokenatedData }, {
-          
-        })
-        .then(res => {
-          return decodeKey(res.data.data)
-        })
-    }
-  
-    limitCBN = async (data: any) => {
-      const tokenatedData: any = await generateKey(data)
-      return this.instance
-        .post('api/CustomerInstruction/GetCifLimit', { data: tokenatedData }, {
-          
-        })
-        .then(res => {
-          return decodeKey(res.data.data)
-        })
-    }
-  
-  
-    validateCheque = async (cheque: any, accountNumber: any) => {
-      const encryptedAccountNumber: any = await generateforString(accountNumber);
-      const encryptedCheque: any = await generateforString(cheque);
-  
-      return this.instance
-        .get(`/api/CustomerInstruction/GetChequeDetails?accountNumber=${safeQuery(encryptedAccountNumber)}&chequeNumber=${safeQuery(encryptedCheque)}`, {
-          
-        })
-        .then(res => {
-          return decodeKey(res.data.data)
-        })
-    }
-  
-    withdrawCheque = async (data: any) => {
-      const tokenatedData: any = await generateKey(data)
-      return this.instance
-        .post('api/CustomerInstruction/ChequeWithdrawal', { data: tokenatedData }, {
-          
-        })
-        .then(res => {
-          return decodeKey(res.data.data)
-        })
-    }
+    return this.instance
+      .get(
+        `api/CustomerInstruction/CustomerInformation?accountNumber=${safeQuery(
+          encryptedAccountNumber
+        )}`
+      )
+      .then((res) => res.data);
+  };
 
+  validateCode = async (transCode: string) => {
+    return this.instance
+      .get(`/api/Transactions/GetLoggedTransaction?transactionId=${safeQuery(transCode)}`)
+      .then((res) => res.data);
+  };
 
-    getAllGlCodes = async () => {
-      const res: any = await this.instance.get("/api/GLCode", {
-        
-      });
-      return decodeKey(res?.data?.data);
-    };
-  
-   
-  }
+  validateBVN = async (bvnNumber: number) => {
+    const encryptedBvnNumber = encryptionService.encrypt(bvnNumber.toString());
+
+    return this.instance
+      .get(`api/ThirdPartyContorller/ValidateBvn?bvn=${safeQuery(encryptedBvnNumber)}`)
+      .then((res) => res.data);
+  };
+
+  deposit = async (data: any) => {
+    return this.instance
+      .post("api/CustomerInstruction/Deposit", data)
+      .then((res) => res.data);
+  };
+
+  chequeDeposit = async (data: any) => {
+    return this.instance
+      .post("api/CustomerInstruction/QueueChequeDeposit", data)
+      .then((res) => res.data);
+  };
+
+  withdraw = async (data: any) => {
+    return this.instance
+      .post("api/CustomerInstruction/SavingsWithdrawal", data)
+      .then((res) => res.data);
+  };
+
+  transfer = async (data: any) => {
+    return this.instance
+      .post("api/CustomerInstruction/TransferInstruction", data)
+      .then((res) => res.data);
+  };
+
+  limitCBN = async (data: any) => {
+    return this.instance
+      .post("api/CustomerInstruction/GetCifLimit", data)
+      .then((res) => res.data);
+  };
+
+  validateCheque = async (cheque: any, accountNumber: any) => {
+    const encryptedAccountNumber = encryptionService.encrypt(accountNumber);
+    const encryptedCheque = encryptionService.encrypt(cheque);
+
+    return this.instance
+      .get(
+        `/api/CustomerInstruction/GetChequeDetails?accountNumber=${safeQuery(
+          encryptedAccountNumber
+        )}&chequeNumber=${safeQuery(encryptedCheque)}`
+      )
+      .then((res) => res.data);
+  };
+
+  withdrawCheque = async (data: any) => {
+    return this.instance
+      .post("api/CustomerInstruction/ChequeWithdrawal", data)
+      .then((res) => res.data);
+  };
+
+  getAllGlCodes = async () => {
+    const res = await this.instance.get("/api/GLCode");
+    return res.data;
+  };
+}

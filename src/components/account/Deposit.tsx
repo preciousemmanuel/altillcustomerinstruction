@@ -227,6 +227,7 @@ export default function Deposit({
       validate(accountNumber)
         .then((res: any) => {
           setIsProcessing(false);
+          console.log("validateAccount", res)
           const responseMessage = res?.description;
           console.log({ res });
           if (responseMessage === "Imal account inquiry Failed") {
@@ -246,7 +247,8 @@ export default function Deposit({
             );
             setSenderAccount(null);
           } else {
-            if (res?.data?.getaccounts?.currency) {
+            console.log("budysysd")
+            if (res.data && res?.data?.getaccounts?.currency) {
               setCurrency(res.data.getaccounts.currency);
               setSenderAccount(res.data.getaccounts);
               let glAccounType: string;
@@ -286,6 +288,7 @@ export default function Deposit({
                 glAccounType = "disabled";
               }
             } else {
+              console.log("dsddhere")
               setIsProcessing(false);
               if (res.data && res.data.message === accountNumber) {
                 toast.error(
@@ -308,7 +311,8 @@ export default function Deposit({
                 return;
 
               }
-              toast.error(DOMPurify.sanitize(res.data.message || res?.description), {
+              console.log("dhdsidiidsd", res.description)
+              toast.error(DOMPurify.sanitize((res.data && res.data.message) || res?.description), {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
